@@ -2,7 +2,7 @@
   <div class="e-nuxt-container">
     <div class="e-nuxt-content">
       <div class="e-nuxt-logo">
-        <img style="max-width: 100%;" src="~assets/electron-nuxt.png">
+        <img style="max-width: 100%;" src="~assets/blue-burlap-logo.png">
       </div>
       <div class="e-nuxt-system-info">
         <system-information />
