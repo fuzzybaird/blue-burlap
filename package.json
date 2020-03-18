@@ -18,8 +18,8 @@
   "author": "Eli Baird <eli.baird@chghealthcare.com>",
   "license": "MIT",
   "homepage": "https://github.com/michalzaq12/electron-nuxt/blob/master/README.md",
-  "engines" : {
-    "node" : ">=12.13.0"
+  "engines": {
+    "node": ">=12.13.0"
   },
   "resolutions": {
     "@types/node": "12.12.6"
@@ -42,7 +42,6 @@
     "eslint-friendly-formatter": "4.0.1",
     "eslint-loader": "3.0.3",
     "@nuxtjs/eslint-config": "1.1.2",
-    
     "nuxt": "2.11.0",
     "node-sass": "4.13.1",
     "sass-loader": "8.0.2",
@@ -56,5 +55,8 @@
     "babel-plugin-webpack-alias-7": "0.1.1",
     "webpack": "4.42.0",
     "webpack-node-externals": "1.7.2"
+  },
+  "dependencies": {
+    "simple-git": "^1.132.0"
   }
 }

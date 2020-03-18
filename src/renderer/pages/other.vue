@@ -8,7 +8,7 @@
     </div>
     <table>
       <tr v-for="item in output" :key="item.id">
-        <td>{{ item.commit }}</td>
+        <td>{{ item.message }}</td>
       </tr>
     </table>
   </div>
@@ -26,8 +26,7 @@ export default {
   },
   mounted () {
     ipcRenderer.on('asynchronous-reply', (event, arg) => {
-      const decoded = JSON.parse(arg)
-      this.reply(decoded)
+      this.reply(arg)
     })
   },
   methods: {
@@ -38,7 +37,7 @@ export default {
       ipcRenderer.send('asynchronous-message', 'ping')
     },
     reply (gitresponse) {
-      this.output = gitresponse
+      this.output = gitresponse.all
     }
   }
 }

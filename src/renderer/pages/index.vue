@@ -24,7 +24,7 @@
 
 <script>
 import { remote } from 'electron'
-import SystemInformation from '@/components/SystemInformation.vue'
+import SystemInformation from '~/components/SystemInformation.vue'
 
 export default {
   components: {
