@@ -1,28 +1,44 @@
 <template>
   <div class="e-nuxt-container">
     <div class="e-nuxt-content">
-     OTHER PAGE
+      Other fucking page
     </div>
-    
+    <div>
+      <button @click="test">test</button>
+    </div>
+    <table>
+      <tr v-for="item in output" :key="item.id">
+        <td>{{ item.commit }}</td>
+      </tr>
+    </table>
   </div>
 </template>
 
 <script>
 import { remote } from 'electron'
-import SystemInformation from '@/components/SystemInformation.vue'
+const { ipcRenderer } = require('electron')
 
 export default {
-  components: {
-    SystemInformation
-  },
   data () {
     return {
-      externalContent: ''
+      output: []
     }
+  },
+  mounted () {
+    ipcRenderer.on('asynchronous-reply', (event, arg) => {
+      const decoded = JSON.parse(arg)
+      this.reply(decoded)
+    })
   },
   methods: {
     openURL (url) {
       remote.shell.openExternal(url)
+    },
+    test () {
+      ipcRenderer.send('asynchronous-message', 'ping')
+    },
+    reply (gitresponse) {
+      this.output = gitresponse
     }
   }
 }
