@@ -1,8 +1,8 @@
 /* globals INCLUDE_RESOURCES_PATH */
 import { app } from 'electron'
-const { exec } = require('child_process')
+// const { exec } = require('child_process')
 const { ipcMain } = require('electron')
-const simpleGit = require('simple-git/promise')('./');
+const simpleGit = require('simple-git/promise')('./')
 /**
  * Set `__resources` path to resources files in renderer process
  */
@@ -22,6 +22,6 @@ app.on('window-all-closed', function () {
 require('./mainWindow')
 
 ipcMain.on('asynchronous-message', async (event, arg) => {
-  let response = await simpleGit.log()
+  const response = await simpleGit.log()
   event.reply('asynchronous-reply', response)
 })
