@@ -46,6 +46,8 @@ export default class BrowserWinHandler {
       this.browserWindow = null
     })
     this._eventEmitter.emit('created')
+
+    require('../menu/mainmenu')
   }
 
   _recreate () {

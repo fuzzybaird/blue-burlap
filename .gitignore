@@ -3,4 +3,4 @@ dist
 build/*
 !build/icons
 node_modules
-yarn-error.log
+**/*.log
