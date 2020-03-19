@@ -1,23 +1,8 @@
 <template>
   <div class="e-nuxt-container">
     <div class="e-nuxt-content">
-      <div class="e-nuxt-logo">
-        <img style="max-width: 100%;" src="~assets/blue-burlap-logo.png">
-      </div>
-      <div class="e-nuxt-system-info">
-        <system-information />
-      </div>
-    </div>
-    <div class="e-nuxt-links">
-      <div class="e-nuxt-button" @click="openURL('https://github.com/michalzaq12/electron-nuxt')">
-        Github
-      </div>
-      <div class="e-nuxt-button" @click="openURL('https://nuxtjs.org/guide')">
-        Nuxt.js
-      </div>
-      <div class="e-nuxt-button" @click="openURL('https://electronjs.org/docs')">
-        Electron.js
-      </div>
+      <h1>home</h1>
+      <p>{{count}}</p>
     </div>
   </div>
 </template>
@@ -25,20 +10,25 @@
 <script>
 import { remote } from 'electron'
 import SystemInformation from '~/components/SystemInformation.vue'
-
+const { ipcRenderer } = require('electron')
 export default {
   components: {
     SystemInformation
   },
   data () {
     return {
-      externalContent: ''
+      count: 1
     }
   },
   methods: {
     openURL (url) {
       remote.shell.openExternal(url)
     }
+  },
+  mounted(){
+    ipcRenderer.on('tick_time', (event, arg) => {
+      this.count = this.count + 1
+    })
   }
 }
 </script>
