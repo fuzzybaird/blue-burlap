@@ -32,7 +32,7 @@ const template = [
       {
         label: 'Settings',
         click (item, focusedWindow) {
-          focusedWindow.loadURL(`${baseUrl}/#/other`)
+          focusedWindow.loadURL(`${baseUrl}/#/settings`)
         }
       },
       {
