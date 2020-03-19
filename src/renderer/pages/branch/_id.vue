@@ -6,6 +6,9 @@
             <template v-slot:cell(fileDiff)="row">
                 <pre>{{row.item.fileDiff}}</pre>
             </template>
+            <template v-slot:cell(select)="row">
+                <input type="checkbox" name="test" id="laskdjfkl">
+            </template>
             </b-table>
         </div>
     </div>
@@ -17,7 +20,10 @@
     export default {
         name: "BranchDetail",
         data() {
-            return {diff: []};
+            return {
+                fields: [{key:'changes', sortable:true}, {key:'fileDiff'}, 'select'],
+                diff: []
+            };
         },
         mounted(){
             ipcRenderer.send('git-detail', this.$route.params.id)
