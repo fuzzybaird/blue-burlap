@@ -25,6 +25,14 @@
           Example page
         </nuxt-link>
       </div>
+      <div>
+        <nuxt-link
+          to="/branch/12lksjdlfkjlas"
+          exact
+        >
+          Branch
+        </nuxt-link>
+      </div>
     </nav>
   </header>
 </template>

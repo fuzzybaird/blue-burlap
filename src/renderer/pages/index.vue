@@ -1,8 +1,19 @@
 <template>
-  <div class="e-nuxt-container">
-    <div class="e-nuxt-content">
-      <h1>home</h1>
-      <p>{{count}}</p>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col">
+        <b-table striped hover :items="branches" :fields="fields">
+          <template v-slot:cell(edit)="row">
+            <nuxt-link
+              :to="'/branch/'+row.item.commit"
+              exact>
+              <b-button size="sm" class="mr-2">
+                Details
+              </b-button>
+            </nuxt-link>
+          </template>
+        </b-table>
+      </div>
     </div>
   </div>
 </template>
@@ -17,7 +28,8 @@ export default {
   },
   data () {
     return {
-      count: 1
+      fields: ['name', 'commit', 'edit'],
+      branches: []
     }
   },
   methods: {
@@ -26,10 +38,12 @@ export default {
     }
   },
   mounted(){
-    ipcRenderer.on('tick_time', (event, arg) => {
-      this.count = this.count + 1
+    ipcRenderer.send('git-branches')
+    ipcRenderer.on('git-branches', (event, payload) => {
+      console.log(payload)
+      this.branches = Object.values(payload.branches)
     })
-  }
+  },
 }
 </script>
 
