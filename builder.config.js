@@ -43,7 +43,7 @@ const macOS = {
 
 module.exports = {
   asar: false,
-  productName: 'My browser',
+  productName: 'IN A WORLD, WHERE BURLAP CAN BE ANY COLOR...IT CHOSE BLUE',
   appId: 'org.michalzarach.my-browser',
   artifactName: 'my-browser-${version}.${ext}',
   directories: {
