@@ -29,11 +29,31 @@ ipcMain.on('git-branches', async (event, arg) => {
   const response = await simpleGit.branch()
   event.reply('git-branches', response)
 })
+ipcMain.on('git-detail', async (event, arg) => {
+  // try {
+  //   const branch = await simpleGit.checkout(arg)  
+  //   console.log(branch); 
+  // } catch (error) {
+  //   console.error(error)
+  // }
+  let diff = 'HELLO';
+  
+  try {
+   diff = await simpleGit.diffSummary()
+    //console.log(diff);
+  } catch (error) {
+   diff = 'ERROR';
+    console.error(error)
+  }
+  
+  
+  event.reply('git-detail', diff)
+})
 app.on('ready', () => {
   function loopLogic() {
     // window is ready to be broadcast too
-    window.default.browserWindow.webContents.send('tick_time')
+    //window.default.browserWindow.webContents.send('tick_time')
   }
   // loopLogic()
-    setInterval(loopLogic, 3000)
+    //setInterval(loopLogic, 3000)
 })

@@ -5,7 +5,7 @@
         <b-table striped hover :items="branches" :fields="fields">
           <template v-slot:cell(edit)="row">
             <nuxt-link
-              :to="'/branch/'+row.item.commit"
+              :to="'/branch/'+row.item.name"
               exact>
               <b-button size="sm" class="mr-2">
                 Details
@@ -28,7 +28,7 @@ export default {
   },
   data () {
     return {
-      fields: ['name', 'commit', 'edit'],
+      fields: [{key:'name', sortable:true}, {key:'commit'}, {key:'edit'}],
       branches: []
     }
   },
