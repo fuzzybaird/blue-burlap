@@ -17,6 +17,14 @@
           Next page
         </nuxt-link>
       </div>
+      <div>
+        <nuxt-link
+          to="/example"
+          exact
+        >
+          Example page
+        </nuxt-link>
+      </div>
     </nav>
   </header>
 </template>
