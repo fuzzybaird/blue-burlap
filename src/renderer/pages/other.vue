@@ -1,21 +1,25 @@
 <template>
   <div class="e-nuxt-container">
     <div class="e-nuxt-content">
-      Other fucking page
-    </div>
-    <div>
-      <button @click="test">test</button>
-    </div>
     <table>
+      <tr>
+        <th>Name</th>
+        <th>Message</th>
+        <th>Date</th>
+      </tr>
       <tr v-for="item in output" :key="item.id">
+        <td>{{ item.author_name }}</td>
         <td>{{ item.message }}</td>
+        <td>{{ item.date }}</td>
       </tr>
     </table>
+    </div>
   </div>
 </template>
 
 <script>
 import { remote } from 'electron'
+import moment from 'moment'
 const { ipcRenderer } = require('electron')
 
 export default {
@@ -25,16 +29,14 @@ export default {
     }
   },
   mounted () {
-    ipcRenderer.on('asynchronous-reply', (event, arg) => {
+    ipcRenderer.send('git-log')
+    ipcRenderer.on('git-log', (event, arg) => {
       this.reply(arg)
     })
   },
   methods: {
     openURL (url) {
       remote.shell.openExternal(url)
-    },
-    test () {
-      ipcRenderer.send('asynchronous-message', 'ping')
     },
     reply (gitresponse) {
       this.output = gitresponse.all

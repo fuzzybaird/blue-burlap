@@ -38,7 +38,7 @@ app.on('ready', () => {
   Menu.setApplicationMenu(menu)
 })
 
-mainWinHandler.onCreated(browserWindow => {
+mainWinHandler.onCreated((browserWindow) => {
   browserWindow.webContents.openDevTools()
 })
 

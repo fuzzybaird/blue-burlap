@@ -25,7 +25,7 @@ export default class BrowserWinHandler {
 
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (!this.allowRecreate) return
+    if (!this.allowRecreate) { return }
     app.on('activate', () => this._recreate())
   }
 
@@ -49,7 +49,7 @@ export default class BrowserWinHandler {
   }
 
   _recreate () {
-    if (this.browserWindow === null) this._create()
+    if (this.browserWindow === null) { this._create() }
   }
 
   /**
@@ -72,7 +72,7 @@ export default class BrowserWinHandler {
      * @returns {Promise<BrowserWindow>}
      */
   created () {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this._eventEmitter.once('created', () => {
         resolve(this.browserWindow)
       })
