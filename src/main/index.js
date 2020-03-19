@@ -18,6 +18,9 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') { app.quit() }
 })
 
+// This is needed for Windows 10 to enable Notifications
+app.setAppUserModelId(process.execPath)
+
 // Load here all startup windows
 require('./mainWindow')
 // how we communicate back and forth between vue
