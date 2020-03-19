@@ -1,6 +1,6 @@
 /* globals INCLUDE_RESOURCES_PATH */
 import { app } from 'electron'
-// const { exec } = require('child_process')
+const { exec } = require('child_process')
 const { ipcMain } = require('electron')
 const simpleGit = require('simple-git/promise')('./')
 /**
@@ -39,18 +39,23 @@ ipcMain.on('git-detail', async (event, arg) => {
   // } catch (error) {
   //   console.error(error)
   // }
-  let diff = 'HELLO';
-  
+  let diff = [];
+  exec('ls -la', (error, stdout, stderr) => {console.log(stdout)})
   try {
-   diff = await simpleGit.diffSummary()
+   let temp = await simpleGit.diffSummary()
+
+   await Promise.all(temp.files.map(async (file) => {
+    let fileDiff = await simpleGit.raw(['diff', file.file])
+    // console.log(fileDiff)
     //console.log(diff);
+    diff.push({...file, fileDiff})
+   }))
+   console.log(diff)
+   event.reply('git-detail', diff)
   } catch (error) {
-   diff = 'ERROR';
     console.error(error)
   }
-  
-  
-  event.reply('git-detail', diff)
+
 })
 app.on('ready', () => {
   function loopLogic() {

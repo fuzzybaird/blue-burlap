@@ -1,10 +1,15 @@
 <template>
-    <div>
-        {{$route.params.id}}
-
-        <code>{{ diff }}</code>
-
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <b-table striped hover :items="diff" :fields="fields">
+            <template v-slot:cell(fileDiff)="row">
+                <pre>{{row.item.fileDiff}}</pre>
+            </template>
+            </b-table>
+        </div>
     </div>
+</div>
 </template>
 
 <script>
@@ -12,13 +17,11 @@
     export default {
         name: "BranchDetail",
         data() {
-            return {diff: ''};
+            return {diff: []};
         },
         mounted(){
             ipcRenderer.send('git-detail', this.$route.params.id)
             ipcRenderer.on('git-detail', (event, payload) => {
-                console.log('git detail mofos')
-                console.log(payload)
                 this.diff = payload
             })
         },

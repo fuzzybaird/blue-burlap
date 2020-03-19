@@ -7,7 +7,6 @@
     </div>
     <div class="row">
       <div class="col">
-        <div class="container-fluid">
           <div class="row">
             <div class="col">Type</div>
             <div class="col">
@@ -17,18 +16,15 @@
                 <option>Scratch Org</option>
               </select>
             </div>
-          </div>
         </div>
       </div>
       <div class="col">
-        <div class="container-fluid">
           <div class="row">
             <div class="col">Path</div>
             <!-- https://jaketrent.com/post/select-directory-in-electron/ -->
             <div class="col"><input type="file" webkitdirectory id="git_path" /></div>
           </div>
         </div>
-      </div>
     </div>
   </div>
 </template>

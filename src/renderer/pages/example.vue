@@ -13,7 +13,7 @@ Middle column
       </div>
       <div class="col">
 
-Right column
+Right column stuff
         
       </div>
     </div>
