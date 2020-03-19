@@ -27,9 +27,8 @@ ipcMain.on('git-log', async (event, arg) => {
 })
 app.on('ready', () => {
 function loopLogic() {
-  console.log(window.default)
-  // window
-  window.default.browserWindow.webContents.send('tick_time')
+  // window is ready to be broadcast too
+  window.default.browserWindow.webContents.send('tick_time', payload)
 }
 // loopLogic()
   setInterval(loopLogic, 3000)
