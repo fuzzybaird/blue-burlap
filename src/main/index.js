@@ -28,11 +28,15 @@ ipcMain.on('git-log', async (event, arg) => {
   const response = await simpleGit.log()
   event.reply('git-log', response)
 })
+ipcMain.on('git-branches', async (event, arg) => {
+  const response = await simpleGit.branch()
+  event.reply('git-branches', response)
+})
 app.on('ready', () => {
-function loopLogic() {
-  // window is ready to be broadcast too
-  window.default.browserWindow.webContents.send('tick_time', payload)
-}
-// loopLogic()
-  setInterval(loopLogic, 3000)
+  function loopLogic() {
+    // window is ready to be broadcast too
+    window.default.browserWindow.webContents.send('tick_time')
+  }
+  // loopLogic()
+    setInterval(loopLogic, 3000)
 })
