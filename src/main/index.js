@@ -1,6 +1,6 @@
 /* globals INCLUDE_RESOURCES_PATH */
 import { app } from 'electron'
-const { exec } = require('child_process')
+// const { exec } = require('child_process')
 const { ipcMain } = require('electron')
 const simpleGit = require('simple-git/promise')('./')
 /**
@@ -19,16 +19,18 @@ app.on('window-all-closed', function () {
 })
 
 // Load here all startup windows
-require('./mainWindow')
+let window = require('./mainWindow')
 // how we communicate back and forth between vue
 ipcMain.on('git-log', async (event, arg) => {
   const response = await simpleGit.log()
   event.reply('git-log', response)
 })
-// app.on('ready', () => {
-// function loopLogic() {
-//   console.log(winHandler)
-//   winHandler.webContents.send('tick_time')
-// }
-// setTimeout(loopLogic, 3000)
-// })
+app.on('ready', () => {
+function loopLogic() {
+  console.log(window.default)
+  // window
+  window.default.browserWindow.webContents.send('tick_time')
+}
+// loopLogic()
+  setInterval(loopLogic, 3000)
+})
