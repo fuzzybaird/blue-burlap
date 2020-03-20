@@ -10,7 +10,7 @@
           <div class="row">
             <div class="col">Type</div>
             <div class="col">
-              <select>
+              <select v-model="settings.orgType">
                 <option>Production</option>
                 <option>Sandbox</option>
                 <option>Scratch Org</option>
@@ -21,11 +21,43 @@
       <div class="col">
           <div class="row">
             <div class="col">Path</div>
-            <!-- https://jaketrent.com/post/select-directory-in-electron/ -->
-            <div class="col"><input type="file" webkitdirectory id="git_path" /></div>
+            <div class="col"><b-form-input v-model="settings.path" placeholder="Enter your name"></b-form-input></div>
           </div>
         </div>
     </div>
+    <b-button @click="writesettings">Write</b-button>
+
+
   </div>
+
+  
+
 </template>
 
+<script>
+import { remote } from 'electron'
+import { settings } from 'cluster';
+const { ipcRenderer } = require('electron')
+
+export default {
+  data () {
+    return {
+      settings: {
+        path: '',
+        orgType: ''
+      }
+    }
+  },
+  methods: {
+    writesettings () {
+      ipcRenderer.send('write-settings', this.settings)
+    }
+  },
+  mounted(){
+      ipcRenderer.send('read-settings')
+      ipcRenderer.on('read-settings', (event, payload) => {
+          this.settings = payload
+      })
+  },
+}
+</script>

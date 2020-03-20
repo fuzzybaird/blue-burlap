@@ -2,7 +2,7 @@
 import { app } from 'electron'
 const { exec } = require('child_process')
 const { ipcMain } = require('electron')
-const simpleGit = require('simple-git/promise')('./')
+
 const fs = require('fs');
 const DATAFILE_PATH = './datafile'
 let Datastore = require('nedb')
@@ -10,8 +10,13 @@ let db = new Datastore({ filename: DATAFILE_PATH, autoload: true })
 
 let settings = {}
 
+let simpleGit = require('simple-git/promise')('./')
 db.findOne({name:'settings'}, (err, result) => {
   settings = result.data
+  if(result.data){
+    console.log('PATH:'+result.data.path)
+    simpleGit = require('simple-git/promise')(result.data.path)
+  }
 })
 
 /**
@@ -35,12 +40,27 @@ app.setAppUserModelId(process.execPath)
 // Load here all startup windows
 let window = require('./mainWindow')
 // how we communicate back and forth between vue
+
+
+ipcMain.on('write-settings', async (event, arg) => {
+  const response = await db.update({ name: 'settings' }, { name: 'settings', data: { ...arg }}, { upsert: true },function (err, numReplaced, upsert) {
+    simpleGit = require('simple-git/promise')(arg.path)
+  })
+})
+
+
+ipcMain.on('read-settings', async (event, arg) => {
+  const response = await db.findOne({name:'settings'}, (err, result) => {
+    event.reply('read-settings', result.data)
+  })
+})
+
 ipcMain.on('git-log', async (event, arg) => {
   const response = await simpleGit.log()
   event.reply('git-log', response)
 })
 ipcMain.on('git-branches', async (event, arg) => {
-  const response = await simpleGit.branch()
+  const response = await simpleGit.branchLocal()
   console.log(response)
   event.reply('git-branches', response)
 })
