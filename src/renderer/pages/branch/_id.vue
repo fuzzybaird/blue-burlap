@@ -2,7 +2,12 @@
 <div class="container">
     <div class="row">
         <div class="col">
-            <b-table head-variant="dark" striped hover :items="diff" :fields="fields">
+        <h1>Current Diffs in Org</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <b-table head-variant="light" striped hover :items="diff" :fields="fields">
             <template  v-slot:cell(fileDiff)="row">
                 <prism class="diff-highlight" language="diff">{{row.item.fileDiff}}</prism>
             </template>

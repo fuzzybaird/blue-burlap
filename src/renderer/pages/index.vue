@@ -1,8 +1,11 @@
 <template>
-  <div class="container-fluid">
+  <div class="container">
+    <div class="row">
+      <div class="col"><h1>Branches</h1></div>
+    </div>
     <div class="row">
       <div class="col">
-        <b-table striped hover :items="branches" :fields="fields">
+        <b-table head-variant="light" striped hover :items="branches" :fields="fields">
           <template v-slot:cell(edit)="row">
             <nuxt-link
               :to="'/branch/'+row.item.name"

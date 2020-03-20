@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid">
+  <div class="container">
     <h1>Settings</h1>
     <div class="row">
       <div class="col"><h2>Salesforce Connection</h2></div>
