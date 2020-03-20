@@ -8,12 +8,12 @@
     <div class="row">
       <div class="col">
           <div class="row">
-            <div class="col">Type</div>
+            <div class="col">Org</div>
             <div class="col">
-              <select v-model="settings.orgType">
-                <option>Production</option>
-                <option>Sandbox</option>
-                <option>Scratch Org</option>
+              <select v-model="settings.org">
+                <option v-for="org in options.orgs" v-bind:key="org.orgId" v-bind:value="org.alias ? org.alias : org.username">
+                  {{org.alias}} {{org.username}}
+                </option>
               </select>
             </div>
         </div>
@@ -21,7 +21,7 @@
       <div class="col">
           <div class="row">
             <div class="col">Path</div>
-            <div class="col"><b-form-input v-model="settings.path" placeholder="Enter your name"></b-form-input></div>
+            <div class="col"><b-form-input v-model="settings.path" placeholder="path to source project"></b-form-input></div>
           </div>
         </div>
     </div>
@@ -42,6 +42,11 @@ const { ipcRenderer } = require('electron')
 export default {
   data () {
     return {
+      options: {
+        orgs: [
+          { orgId: '', username: '' }
+        ]
+      },
       settings: {
         path: '',
         orgType: ''
@@ -54,10 +59,15 @@ export default {
     }
   },
   mounted(){
-      ipcRenderer.send('read-settings')
-      ipcRenderer.on('read-settings', (event, payload) => {
-          this.settings = payload
-      })
+    ipcRenderer.send('read-options')
+    ipcRenderer.on('read-options', (event, payload) => {
+      console.log('read-options payload: ', payload)
+      this.options = payload
+    })
+    ipcRenderer.send('read-settings')
+    ipcRenderer.on('read-settings', (event, payload) => {
+      this.settings = payload
+    })
   },
 }
 </script>
