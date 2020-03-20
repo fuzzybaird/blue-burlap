@@ -1,5 +1,5 @@
 {
-  "name": "blue-burlap",
+  "name": "Blue-Burlap",
   "version": "0.1.0",
   "description": "Simplify Salesforce development with Git",
   "main": "./dist/main/index.js",

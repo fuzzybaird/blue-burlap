@@ -3,7 +3,7 @@ const ICONS_DIR = 'build/icons/'
 const windowsOS = {
   win: {
     icon: ICONS_DIR + 'win-icon.ico',
-    publisherName: 'michal',
+    publisherName: 'Eli Baird',
     target: 'nsis'
   },
 
@@ -22,7 +22,7 @@ const linuxOS = {
 const macOS = {
   mac: {
     target: 'dmg',
-    icon: ICONS_DIR + 'con.icns'
+    icon: ICONS_DIR + 'icon.icns'
   },
   dmg: {
     contents: [
@@ -43,9 +43,10 @@ const macOS = {
 
 module.exports = {
   asar: false,
-  productName: 'IN A WORLD, WHERE BURLAP CAN BE ANY COLOR...IT CHOSE BLUE',
-  appId: 'org.michalzarach.my-browser',
-  artifactName: 'my-browser-${version}.${ext}',
+  productName: 'Blue-Burlap',
+  copyright: 'Copyright © 2020 ${author}',
+  appId: 'org.blue-burlap.app',
+  artifactName: 'blue-burlap-${version}.${ext}',
   directories: {
     output: 'build'
   },
