@@ -40,11 +40,10 @@
 
 <script>
     const { ipcRenderer } = require('electron')
-    import 'prismjs'
-    import 'prismjs/themes/prism-coy.css'
-    import 'prismjs/components/prism-diff'
-    import 'prismjs/plugins/diff-highlight/prism-diff-highlight.css'
-    import Prism from 'vue-prism-component'
+    import "prismjs";
+    import 'prismjs/components/prism-diff.min'
+    import 'prismjs/plugins/diff-highlight/prism-diff-highlight'
+    import Prism from "vue-prism-component";
     export default {
         name: "BranchDetail",
         components: {Prism},
@@ -63,6 +62,8 @@
     }
 </script>
 
-<style lang="scss" scoped>
-
+<style>
+@import url('../../../resources/prism.css');
+@import url('../../../resources/prism-coy.css');
+@import url('../../../resources/prism-diff-highlight.css');
 </style>

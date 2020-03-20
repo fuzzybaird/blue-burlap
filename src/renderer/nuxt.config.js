@@ -11,8 +11,12 @@ module.exports = {
   },
   loading: false,
   plugins: [
-    { ssr: true, src: '@/plugins/icons.js' }
-
+    { ssr: true, src: '@/plugins/icons.js' },
+    { mode: 'client', src: '@/plugins/prism.js' }
+  ],
+  css: [
+    'prismjs/themes/prism-coy.css',
+    'prismjs/plugins/diff-highlight/prism-diff-highlight.css'
   ],
   buildModules: [
 
