@@ -1,10 +1,10 @@
 <template>
-<div class="container-fluid">
+<div class="container">
     <div class="row">
         <div class="col">
-            <b-table striped hover :items="diff" :fields="fields">
-            <template v-slot:cell(fileDiff)="row">
-                <prism language="diff">{{row.item.fileDiff}}</prism>
+            <b-table head-variant="dark" striped hover :items="diff" :fields="fields">
+            <template  v-slot:cell(fileDiff)="row">
+                <prism class="diff-highlight" language="diff">{{row.item.fileDiff}}</prism>
             </template>
             </b-table>
         </div>
@@ -17,6 +17,7 @@
     import 'prismjs'
     import 'prismjs/themes/prism-coy.css'
     import 'prismjs/components/prism-diff'
+    import 'prismjs/plugins/diff-highlight/prism-diff-highlight.css'
     import Prism from 'vue-prism-component'
     export default {
         name: "BranchDetail",

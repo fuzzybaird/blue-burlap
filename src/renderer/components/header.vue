@@ -1,24 +1,14 @@
 <template>
-  <header class="main-header">
-    <nav>
-      <div>
-        <nuxt-link
-          to="/"
-          exact
-        >
+  <b-navbar sticky="true" toggleable="lg" type="dark" variant="info">
+    <b-navbar-nav>
+      <b-nav-item to="/">
           Branches
-        </nuxt-link>
-      </div>
-      <div>
-        <nuxt-link
-          to="/settings"
-          exact
-        >
+      </b-nav-item>
+      <b-nav-item to="/settings">
           settings
-        </nuxt-link>
-      </div>
-    </nav>
-  </header>
+      </b-nav-item>
+    </b-navbar-nav>
+  </b-navbar>
 </template>
 
 <script>
@@ -27,36 +17,3 @@ export default {
 }
 </script>
 
-<style scoped>
-    .main-header {
-        height: 50px;
-        display: flex;
-        background-color: #364758;
-    }
-
-    nav{
-        width: 100%;
-        display: flex;
-        justify-content: center;
-    }
-
-    nav div{
-        height: 100%;
-        margin: 0 20px;
-        display: flex;
-        align-items: center;
-    }
-
-    a {
-        font-family: Helvetica, sans-serif;
-        color: white;
-        font-size: 1rem;
-        font-weight: 100;
-        text-decoration: underline;
-        text-transform: uppercase;
-    }
-
-    a:hover{
-        opacity: 0.9;
-    }
-</style>
