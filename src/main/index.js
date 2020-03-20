@@ -4,15 +4,16 @@ const { exec } = require('child_process')
 const { ipcMain } = require('electron')
 const simpleGit = require('simple-git/promise')('./')
 const fs = require('fs');
-try {
-  if (fs.existsSync('./datafile')) {
-    //file exists
-  }
-} catch(err) {
-  console.error(err)
-}
+const DATAFILE_PATH = './datafile'
 let Datastore = require('nedb')
-let  db = new Datastore({ filename: 'path/to/datafile', autoload: true })
+let db = new Datastore({ filename: DATAFILE_PATH, autoload: true })
+
+let settings = {}
+
+db.findOne({name:'settings'}, (err, result) => {
+  settings = result.data
+})
+
 /**
  * Set `__resources` path to resources files in renderer process
  */
