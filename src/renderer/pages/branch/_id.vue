@@ -4,10 +4,7 @@
         <div class="col">
             <b-table striped hover :items="diff" :fields="fields">
             <template v-slot:cell(fileDiff)="row">
-                <pre>{{row.item.fileDiff}}</pre>
-            </template>
-            <template v-slot:cell(select)="row">
-                <input type="checkbox" name="test" id="laskdjfkl">
+                <prism language="diff">{{row.item.fileDiff}}</prism>
             </template>
             </b-table>
         </div>
@@ -17,11 +14,16 @@
 
 <script>
     const { ipcRenderer } = require('electron')
+    import 'prismjs'
+    import 'prismjs/themes/prism-coy.css'
+    import 'prismjs/components/prism-diff'
+    import Prism from 'vue-prism-component'
     export default {
         name: "BranchDetail",
+        components: {Prism},
         data() {
             return {
-                fields: [{key:'changes', sortable:true}, {key:'fileDiff'}, 'select'],
+                fields: [{key:'changes', sortable:true}, {key:'fileDiff'}],
                 diff: []
             };
         },

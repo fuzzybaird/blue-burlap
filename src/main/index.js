@@ -30,6 +30,7 @@ ipcMain.on('git-log', async (event, arg) => {
 })
 ipcMain.on('git-branches', async (event, arg) => {
   const response = await simpleGit.branch()
+  console.log(response)
   event.reply('git-branches', response)
 })
 ipcMain.on('git-detail', async (event, arg) => {

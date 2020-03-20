@@ -6,31 +6,15 @@
           to="/"
           exact
         >
-          System info
+          Branches
         </nuxt-link>
       </div>
       <div>
         <nuxt-link
-          to="/other"
+          to="/settings"
           exact
         >
-          Next page
-        </nuxt-link>
-      </div>
-      <div>
-        <nuxt-link
-          to="/example"
-          exact
-        >
-          Example page
-        </nuxt-link>
-      </div>
-      <div>
-        <nuxt-link
-          to="/branch/12lksjdlfkjlas"
-          exact
-        >
-          Branch
+          settings
         </nuxt-link>
       </div>
     </nav>
