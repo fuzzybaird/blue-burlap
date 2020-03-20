@@ -43,6 +43,7 @@
     import "prismjs";
     import 'prismjs/components/prism-diff.min'
     import 'prismjs/plugins/diff-highlight/prism-diff-highlight'
+
     import Prism from "vue-prism-component";
     export default {
         name: "BranchDetail",
@@ -50,7 +51,8 @@
         data() {
             return {
                 fields: ['checkbox',{key:'changes', sortable:false}, {key:'fileDiff'}],
-                diff: []
+                diff: [],
+                text: ''
             };
         },
         mounted(){
