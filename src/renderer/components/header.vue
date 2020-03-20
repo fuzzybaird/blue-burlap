@@ -1,5 +1,5 @@
 <template>
-  <b-navbar sticky="true" toggleable="lg" type="dark" variant="info">
+  <b-navbar toggleable="lg" type="dark" variant="info">
     <div class="container">
       <b-navbar-nav>
         <b-nav-item to="/">
