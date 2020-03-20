@@ -9,7 +9,7 @@
         <div class="col">
             <b-table head-variant="light" striped hover :items="diff" :fields="fields">
             <template  v-slot:cell(fileDiff)="row">
-                <prism class="diff-highlight" language="diff">{{row.item.fileDiff}}</prism>
+                <!-- <prism class="diff-highlight" language="diff">{{row.item.fileDiff}}</prism> -->
             </template>
             </b-table>
         </div>
@@ -19,14 +19,14 @@
 
 <script>
     const { ipcRenderer } = require('electron')
-    import 'prismjs'
-    import 'prismjs/themes/prism-coy.css'
-    import 'prismjs/components/prism-diff'
-    import 'prismjs/plugins/diff-highlight/prism-diff-highlight.css'
-    import Prism from 'vue-prism-component'
+    // import 'prismjs'
+    // import 'prismjs/themes/prism-coy.css'
+    // import 'prismjs/components/prism-diff'
+    // import 'prismjs/plugins/diff-highlight/prism-diff-highlight.css'
+    // import Prism from 'vue-prism-component'
     export default {
         name: "BranchDetail",
-        components: {Prism},
+        // components: {Prism},
         data() {
             return {
                 fields: [{key:'changes', sortable:true}, {key:'fileDiff'}],
