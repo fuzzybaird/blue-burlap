@@ -6,7 +6,7 @@
             Branches
         </b-nav-item>
         <b-nav-item to="/settings">
-            settings
+            Settings
         </b-nav-item>
       </b-navbar-nav>
     </div>

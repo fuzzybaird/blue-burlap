@@ -1,7 +1,7 @@
 {
   "name": "blue-burlap",
-  "version": "0.0.1",
-  "description": "An electron-nuxt project",
+  "version": "0.1.0",
+  "description": "Simplify Salesforce development with Git",
   "main": "./dist/main/index.js",
   "scripts": {
     "dev": "node .electron-nuxt/check-engines.js && cross-env-shell NODE_ENV=development node .electron-nuxt/index.js",
