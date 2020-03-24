@@ -15,6 +15,13 @@
               </b-button>
             </nuxt-link>
           </template>
+          <template v-slot:table-colgroup="scope">
+            <col
+            v-for="field in scope.fields"
+            :key="field.key"
+            :style="{ width: field.key === 'edit' ? '50px' : '' }"
+            >
+          </template>
         </b-table>
       </div>
     </div>
