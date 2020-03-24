@@ -8,10 +8,10 @@
         <b-table head-variant="light" striped hover :items="branches" :fields="fields">
           <template v-slot:cell(edit)="row">
             <nuxt-link
-              :to="'/branch/'+row.item.name"
+              :to="'/branch/'+encodeURIComponent(row.item.name)"
               exact>
               <b-button size="sm" class="mr-2">
-                Details
+                Checkout
               </b-button>
             </nuxt-link>
           </template>

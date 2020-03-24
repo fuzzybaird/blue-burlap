@@ -14,8 +14,11 @@
 				</template>
 
 				<template  v-slot:cell(fileDiff)="row">
-					<prism v-if="row.item.fileDiff" class="diff-highlight" language="diff">{{row.item.fileDiff}}</prism>
-					<p v-else><strong>New File:</strong> {{row.item.path}}</p>
+					<a href="javascript://" @click="row.item.show = !row.item.show">{{ row.item.path }}</a>
+					<div v-if="row.item.show">
+						<prism v-if="row.item.fileDiff" class="diff-highlight" language="diff">{{row.item.fileDiff}}</prism>
+						<p v-else><strong>New File:</strong> {{row.item.path}}</p>
+					</div>
 				</template>
 			</b-table>
 

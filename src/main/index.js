@@ -102,24 +102,37 @@ ipcMain.on('git-log', async (event, arg) => {
   const response = await simpleGit.log()
   event.reply('git-log', response)
 })
+
 ipcMain.on('git-branches', async (event, arg) => {
-  const response = await simpleGit.branchLocal()
+  await simpleGit.fetch()
+  const response = await simpleGit.branch()
+  Object.values(response.branches).map((item) => {
+    if (item.name.match(/^remotes/)) item['_rowVariant'] = 'dark'
+    else if (item.current === true) item['_rowVariant'] = 'success'
+  })
   console.log(response)
   event.reply('git-branches', response)
 })
+
 ipcMain.on('git-detail', async (event, arg) => {
-  // try {
-  //   const branch = await simpleGit.checkout(arg)  
-  //   console.log(branch); 
-  // } catch (error) {
-  //   console.error(error)
-  // }
+  try {
+    if (arg.match(/^remotes/)) {
+      arg = arg.replace(/^remotes\/.*?\//, '')
+    }
+
+    console.log(`Checking out branch [${arg}]...`); 
+
+    const branch = await simpleGit.checkout(arg)  
+  } catch (error) {
+    console.error(error)
+  }
+
   let diff = [];
   exec('ls -la', (error, stdout, stderr) => {console.log(stdout)})
   try {
    let temp = await simpleGit.status()
 
-   console.log('temp: ', temp)
+   // console.log('temp: ', temp)
 
    await Promise.all(temp.files.map(async (file) => {
       console.log('file: ' + file.path)
@@ -131,9 +144,13 @@ ipcMain.on('git-detail', async (event, arg) => {
       } else {
         fileDiff = await simpleGit.raw(['diff', file.path])
       }
+
+      // Strip file header from Unified Diff because we know what file it is
+      fileDiff = fileDiff.replace(/^diff.*?(@@)/s, '$1')
+
       // console.log(fileDiff)
       // console.log(diff);
-      diff.push({...file, fileDiff})
+      diff.push({...file, fileDiff, show: false})
     }))
     console.log(diff)
 
