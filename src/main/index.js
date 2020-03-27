@@ -1,12 +1,10 @@
 /* globals INCLUDE_RESOURCES_PATH */
-import { app } from 'electron'
+import { app, Notification } from 'electron'
 const { exec } = require('child_process')
 const { ipcMain } = require('electron')
 const path = require('path')
 const fs = require('fs');
 const DATAFILE_PATH = path.resolve(__dirname) + '/datafile'
-console.log('__dirname: ', __dirname)
-console.log('path.resolve(__dirname): ', path.resolve(__dirname))
 let Datastore = require('nedb')
 let db = new Datastore({ filename: DATAFILE_PATH, autoload: true })
 
@@ -51,12 +49,14 @@ let window = require('./mainWindow')
  */
 function execShellCommand(cmd) {
   const exec = require('child_process').exec;
+
   return new Promise((resolve, reject) => {
     exec(cmd, (error, stdout, stderr) => {
       if (error) {
         console.warn(error);
         reject(stderr)
       }
+
       resolve(stdout);
     });
   });
@@ -92,8 +92,14 @@ ipcMain.on('read-settings', async (event, arg) => {
 ipcMain.on('sync', async (event, arg) => {
   //exec(`cd ${settings.path}; sfdx force:auth:list --json`, (error, stdout, stderr) => {
   process.chdir(settings.path)
+
+  // Request a sync from Salesforce org; currently only "CustomObject" is pulled back...
   exec(`sfdx force:source:retrieve -u ${settings.org} -m CustomObject`, (error, stdout, stderr) => {
-    console.log(stdout)
+    console.log('Sync Result: ', stdout)
+    new Notification({
+      title: 'Sync Complete!',
+      body: 'The sync from Salesforce has completed.'
+    }).show()
     event.reply('sync', {})
   })
 })
@@ -106,10 +112,13 @@ ipcMain.on('git-log', async (event, arg) => {
 ipcMain.on('git-branches', async (event, arg) => {
   await simpleGit.fetch()
   const response = await simpleGit.branch()
+
   Object.values(response.branches).map((item) => {
+    // Hightlight rows for remote-only branches, and currently checked out branch
     if (item.name.match(/^remotes/)) item['_rowVariant'] = 'dark'
     else if (item.current === true) item['_rowVariant'] = 'success'
   })
+
   console.log(response)
   event.reply('git-branches', response)
 })
@@ -129,6 +138,7 @@ ipcMain.on('git-detail', async (event, arg) => {
 
   let diff = [];
   exec('ls -la', (error, stdout, stderr) => {console.log(stdout)})
+
   try {
    let temp = await simpleGit.status()
 
@@ -157,13 +167,13 @@ ipcMain.on('git-detail', async (event, arg) => {
     // Get also diffs for untracked files...
     temp = await simpleGit.status()
 
-
     event.reply('git-detail', diff)
   } catch (error) {
     console.error(error)
   }
 
 })
+
 app.on('ready', () => {
   function loopLogic() {
     // window is ready to be broadcast too

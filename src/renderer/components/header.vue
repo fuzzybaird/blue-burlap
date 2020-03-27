@@ -12,6 +12,7 @@
       <b-navbar-nav class="ml-auto">
         <b-button v-if="!loading" @click="sync">Sync</b-button>
         <b-button v-else disabled="disabled">Syncing...</b-button>
+        <img v-if="loading" style="width:48px;height:48px;" src="~assets/sync.gif" />
       </b-navbar-nav>
     </div>
   </b-navbar>

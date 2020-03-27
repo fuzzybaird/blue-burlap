@@ -17,16 +17,16 @@ const template = [
         click (item, focusedWindow) {
           console.log('About to create a test notification...')
           console.log('Notification.isSupported() = ' + Notification.isSupported())
-          let myNotification = new Notification({
+          new Notification({
             title: 'Test Notification!',
             body: 'This is the body of the test notification. Hopefully you can see it.'
-          })
+          }).show()
           
-          myNotification.onclick = () => {
-            console.log('Notification clicked')
-          }
-          
-          myNotification.show()
+          // This isn't working on Windows 10...
+          // myNotification.onclick = () => {
+          //   console.log('Notification clicked')
+          // }
+          //myNotification.show()
         }
       },
       {
