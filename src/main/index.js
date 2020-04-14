@@ -75,6 +75,20 @@ ipcMain.on('read-options', async (event, arg) => {
     let options = {}
     console.log('auth list output: ', output)
     options.orgs = JSON.parse(output).result
+    
+    // TODO: read metadata types from e.g.: ./.sfdx/orgs/{USERNAME}/metadataTypeInfos.json
+    options.metadata = [
+      { name: 'ApexClass' },
+      { name: 'ApexComponent' },
+      { name: 'ApexPage' },
+      { name: 'CustomField' },
+      { name: 'CustomLabel' },
+      { name: 'CustomObject' },
+      { name: 'GlobalValueSet' },
+      { name: 'Layout' },
+      { name: 'ListView' },
+    ];
+    
     event.reply('read-options', options)
   } catch (err) {
     // TODO: Tell user to log-in or provide a way
@@ -93,8 +107,10 @@ ipcMain.on('sync', async (event, arg) => {
   //exec(`cd ${settings.path}; sfdx force:auth:list --json`, (error, stdout, stderr) => {
   process.chdir(settings.path)
 
+console.log('settings: metadata: ' + settings.metadata)
+
   // Request a sync from Salesforce org; currently only "CustomObject" is pulled back...
-  exec(`sfdx force:source:retrieve -u ${settings.org} -m CustomObject`, (error, stdout, stderr) => {
+  exec(`sfdx force:source:retrieve -u ${settings.org} -m ${settings.metadata}`, (error, stdout, stderr) => {
     console.log('Sync Result: ', stdout)
     new Notification({
       title: 'Sync Complete!',

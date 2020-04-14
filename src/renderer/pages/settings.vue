@@ -7,23 +7,33 @@
     </div>
     <div class="row">
       <div class="col">
-          <div class="row">
-            <div class="col">Org</div>
-            <div class="col">
-              <select v-model="settings.org">
-                <option v-for="org in options.orgs" v-bind:key="org.orgId" v-bind:value="org.alias ? org.alias : org.username">
-                  {{org.alias}} {{org.username}}
-                </option>
-              </select>
-            </div>
+        <div class="row">
+          <div class="col">Org</div>
+          <div class="col">
+            <select v-model="settings.org">
+              <option v-for="org in options.orgs" v-bind:key="org.orgId" v-bind:value="org.alias ? org.alias : org.username">
+                {{org.alias}} {{org.username}}
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">Metadata</div>
+          <div class="col">
+            <select v-model="settings.metadata" multiple="multiple">
+              <option v-for="metadata in options.metadata" v-bind:key="metadata.name" v-bind:value="metadata.name">
+                {{metadata.name}}
+              </option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="col">
-          <div class="row">
-            <div class="col">Path</div>
-            <div class="col"><b-form-input v-model="settings.path" placeholder="path to source project"></b-form-input></div>
-          </div>
+        <div class="row">
+          <div class="col">Path</div>
+          <div class="col"><b-form-input v-model="settings.path" placeholder="path to source project"></b-form-input></div>
         </div>
+      </div>
     </div>
     <b-button @click="writesettings">Write</b-button>
 
@@ -45,6 +55,9 @@ export default {
       options: {
         orgs: [
           { orgId: '', username: '' }
+        ],
+        metadata: [
+          { name: '' }
         ]
       },
       settings: {
