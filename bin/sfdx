@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Mocks the 'sfdx' app for testing purposes
+# Fakes the sfdx commands used in project
+
+# SFDX commands used in main:
+# const output = await execShellCommand(`sfdx force:auth:list --json`)
+# exec(`sfdx force:source:retrieve -u ${settings.org} -m ${settings.metadata}`, (error, stdout, stderr) => {
+
+# cd to script directory
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $DIR
+
+args=$*
+OLDIFS=$IFS
+
+# Mock the commands, including fake wait time
+if [[ $args =~ force:auth:list ]]; then
+    sleep 1s
+    cat auth_list.json
+    echo
+elif [[ $args =~ force:source:retrieve ]]; then
+    sleep 6s
+    # add a random value to file
+    sed -i "3i<!-- Comment added by `whoami` at `date` -->" ../force-app/main/default/objects/Cat__c/Cat__c.object-meta.xml
+    cat source_retrieve.output
+    echo
+fi

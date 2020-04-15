@@ -71,7 +71,7 @@ ipcMain.on('save-settings', async (event, arg) => {
 
 ipcMain.on('read-options', async (event, arg) => {
   try {
-    const output = await execShellCommand(`sfdx force:auth:list --json`)
+    const output = await execShellCommand(`${settings.sfdxCommand} force:auth:list --json`)
     let options = {}
     console.log('auth list output: ', output)
     options.orgs = JSON.parse(output).result
@@ -110,7 +110,7 @@ ipcMain.on('sync', async (event, arg) => {
 console.log('settings: metadata: ' + settings.metadata)
 
   // Request a sync from Salesforce org; currently only "CustomObject" is pulled back...
-  exec(`sfdx force:source:retrieve -u ${settings.org} -m ${settings.metadata}`, (error, stdout, stderr) => {
+  exec(`${settings.sfdxCommand} force:source:retrieve -u ${settings.org} -m ${settings.metadata}`, (error, stdout, stderr) => {
     console.log('Sync Result: ', stdout)
     new Notification({
       title: 'Sync Complete!',

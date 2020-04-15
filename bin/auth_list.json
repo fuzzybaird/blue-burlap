@@ -1,0 +1,21 @@
+{
+  "status": 0,
+  "result": [
+    {
+      "alias": "dev",
+      "username": "frank.jones@mycompany.com.dev",
+      "orgId": "00Dc0000004lNDeEBF",
+      "instanceUrl": "https://test--DEV.cs14.my.salesforce.com",
+      "accessToken": "00Dc0000004lNDe!ARsBQPr.GwGyv4yeZsIl4DHTeFj3FTY5F1Q.OPjD0kl8W06I.l.j7gP2vzh78rioX5OScObeCEzlZmmka9nO7Fb3AAREWZji",
+      "oauthMethod": "web"
+    },
+    {
+      "alias": "developer",
+      "username": "frank.jones@gmail.com",
+      "orgId": "00DG0000000gnu3B4A",
+      "instanceUrl": "https://na47.salesforce.com",
+      "accessToken": "00DG0000001gve3!ARgAQOEDsVmjucmFztERuc2lKqCXSE.Xv_Gahq.aw0E9w1rbgaZU33n8I3.omIedj5LNBvBzTultCOwPqN2vfF2vluFZFsFt",
+      "oauthMethod": "web"
+    }
+  ]
+}

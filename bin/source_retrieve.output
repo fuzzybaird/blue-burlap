@@ -1,0 +1,11 @@
+=== Retrieved Source
+FULL NAME             TYPE          PROJECT PATH
+────────────────────  ────────────  ────────────────────────────────────────────────────────────────────────────────────────
+Shipment__c           CustomObject  force-app\main\default\objects\Shipment__c\Shipment__c.object-meta.xml
+Merchandise__c        CustomObject  force-app\main\default\objects\Merchandise__c\Merchandise__c.object-meta.xml
+Cat__c                CustomObject  force-app\main\default\objects\Cat__c\Cat__c.object-meta.xml
+FAQ_Entry__c          CustomObject  force-app\main\default\objects\FAQ_Entry__c\FAQ_Entry__c.object-meta.xml
+Merchandise1__c       CustomObject  force-app\main\default\objects\Merchandise1__c\Merchandise1__c.object-meta.xml
+Interested_Person__c  CustomObject  force-app\main\default\objects\Interested_Person__c\Interested_Person__c.object-meta.xml
+Line_Item__c          CustomObject  force-app\main\default\objects\Line_Item__c\Line_Item__c.object-meta.xml
+Invoice_Statement__c  CustomObject  force-app\main\default\objects\Invoice_Statement__c\Invoice_Statement__c.object-meta.xml

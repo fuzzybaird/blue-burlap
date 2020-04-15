@@ -29,6 +29,10 @@
           <b-col cols="2">Path</b-col>
           <b-col cols="10"><b-form-input v-model="settings.path" placeholder="path to source project"></b-form-input></b-col>
         </b-row>
+        <b-row align-v="center">
+          <b-col cols="2">SFDX</b-col>
+          <b-col cols="10"><b-form-input v-model="settings.sfdxCommand" placeholder="sfdx command"></b-form-input></b-col>
+        </b-row>
       </b-col>
     </b-row>
     <b-row align-h="end">
@@ -59,6 +63,7 @@ export default {
       },
       settings: {
         path: '',
+        sfdxCommand: 'sfdx',
         orgType: '',
         metadata: []
       }
