@@ -78,15 +78,16 @@ ipcMain.on('read-options', async (event, arg) => {
     
     // TODO: read metadata types from e.g.: ./.sfdx/orgs/{USERNAME}/metadataTypeInfos.json
     options.metadata = [
-      { value: 'ApexClass', text: 'ApexClass' },
-      { value: 'ApexComponent', text: 'ApexComponent' },
-      { value: 'ApexPage', text: 'ApexPage' },
-      { value: 'CustomField', text: 'CustomField' },
-      { value: 'CustomLabel', text: 'CustomLabel' },
-      { value: 'CustomObject', text: 'CustomObject' },
-      { value: 'GlobalValueSet', text: 'GlobalValueSet' },
-      { value: 'Layout', text: 'Layout' },
-      { value: 'ListView', text: 'ListView' },
+      { value: 'ApexClass', text: 'Apex Classes' },
+      { value: 'CustomField', text: 'Custom Fields' },
+      { value: 'CustomLabel', text: 'Custom Labels' },
+      { value: 'CustomObject', text: 'Custom Objects' },
+      { value: 'GlobalValueSet', text: 'Global Value Sets' },
+      { value: 'Layout', text: 'Layouts' },
+      { value: 'ListView', text: 'List Views' },
+      { value: 'CustomObject:Account,CustomObject:Contact,CustomObject:Opportunity', text: 'Standard Objects' },
+      { value: 'ApexComponent', text: 'Visualforce Components' },
+      { value: 'ApexPage', text: 'Visualforce Pages' },
     ];
     
     event.reply('read-options', options)
