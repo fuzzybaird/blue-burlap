@@ -62,7 +62,7 @@ function execShellCommand(cmd) {
   });
 }
 
-ipcMain.on('write-settings', async (event, arg) => {
+ipcMain.on('save-settings', async (event, arg) => {
   const response = await db.update({ name: 'settings' }, { name: 'settings', data: { ...arg }}, { upsert: true }, function (err, numReplaced, upsert) {
     settings = arg
     simpleGit = require('simple-git/promise')(arg.path)
@@ -78,15 +78,15 @@ ipcMain.on('read-options', async (event, arg) => {
     
     // TODO: read metadata types from e.g.: ./.sfdx/orgs/{USERNAME}/metadataTypeInfos.json
     options.metadata = [
-      { name: 'ApexClass' },
-      { name: 'ApexComponent' },
-      { name: 'ApexPage' },
-      { name: 'CustomField' },
-      { name: 'CustomLabel' },
-      { name: 'CustomObject' },
-      { name: 'GlobalValueSet' },
-      { name: 'Layout' },
-      { name: 'ListView' },
+      { value: 'ApexClass', text: 'ApexClass' },
+      { value: 'ApexComponent', text: 'ApexComponent' },
+      { value: 'ApexPage', text: 'ApexPage' },
+      { value: 'CustomField', text: 'CustomField' },
+      { value: 'CustomLabel', text: 'CustomLabel' },
+      { value: 'CustomObject', text: 'CustomObject' },
+      { value: 'GlobalValueSet', text: 'GlobalValueSet' },
+      { value: 'Layout', text: 'Layout' },
+      { value: 'ListView', text: 'ListView' },
     ];
     
     event.reply('read-options', options)
@@ -144,50 +144,62 @@ ipcMain.on('git-detail', async (event, arg) => {
     if (arg.match(/^remotes/)) {
       arg = arg.replace(/^remotes\/.*?\//, '')
     }
-
+    
     console.log(`Checking out branch [${arg}]...`); 
-
+    
     const branch = await simpleGit.checkout(arg)  
   } catch (error) {
     console.error(error)
   }
-
+  
   let diff = [];
-  exec('ls -la', (error, stdout, stderr) => {console.log(stdout)})
-
+  //exec('ls -la', (error, stdout, stderr) => {console.log(stdout)})
+  
   try {
-   let temp = await simpleGit.status()
-
-   // console.log('temp: ', temp)
-
-   await Promise.all(temp.files.map(async (file) => {
+    let temp = await simpleGit.status()
+    
+    // console.log('temp: ', temp)
+    
+    await Promise.all(temp.files.map(async (file) => {
+      file.path = file.path.replace(/"/g, '')
       console.log('file: ' + file.path)
       let fileDiff = null
-
+      
       if (file.index === '?') {
         // TODO: This does not work; need a way to get diff for non-tracked file
         //fileDiff = await simpleGit.raw(['diff', '--no-index', 'empty-file', file.path])
       } else {
         fileDiff = await simpleGit.raw(['diff', file.path])
+        // // Strip file header from Unified Diff because we know what file it is
+        if (fileDiff !== null)
+          fileDiff = fileDiff.replace(/^diff.*?(@@)/s, '$1')
       }
-
-      // Strip file header from Unified Diff because we know what file it is
-      fileDiff = fileDiff.replace(/^diff.*?(@@)/s, '$1')
 
       // console.log(fileDiff)
       // console.log(diff);
       diff.push({...file, fileDiff, show: false})
     }))
     console.log(diff)
-
+    
     // Get also diffs for untracked files...
     temp = await simpleGit.status()
-
+    
     event.reply('git-detail', diff)
   } catch (error) {
     console.error(error)
   }
+  
+})
 
+ipcMain.on('commit', async (event, arg) => {
+  console.log('commit!')
+  const files = arg.selectedFiles
+  
+  console.log('arg: ', arg)
+
+  let temp = await simpleGit.add(files)
+  temp = await simpleGit.commit(arg.message)
+  event.reply('commit', {status:'done'})
 })
 
 app.on('ready', () => {
@@ -196,5 +208,5 @@ app.on('ready', () => {
     //window.default.browserWindow.webContents.send('tick_time')
   }
   // loopLogic()
-    //setInterval(loopLogic, 3000)
+  //setInterval(loopLogic, 3000)
 })
