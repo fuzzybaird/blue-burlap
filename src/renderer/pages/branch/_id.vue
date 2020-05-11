@@ -65,8 +65,19 @@
 			commit () {
 				ipcRenderer.send('commit', this.commitDetail)
 				ipcRenderer.on('commit', (event, payload) => {
+					let target = '/?'
+
+					console.log('payload: ' + JSON.stringify(payload))
+
+					if (payload.successful)	{
+						let message = `Successful commit ${payload.commit} (${payload.summary.changes} change(s)) on branch ${payload.branch}`
+						target += 'success=' + encodeURIComponent(message)
+					} else {
+						target += 'error=' + encodeURIComponent('Unabled to commit to the selected branch at this time. Please check the git status in your console.')
+					}
+
 					this.$router.push({
-						path: '/'
+						path: target
 					})
 				})
 			}
@@ -74,6 +85,11 @@
 		mounted(){
 			ipcRenderer.send('git-detail', this.$route.params.id)
 			ipcRenderer.on('git-detail', (event, payload) => {
+				if (payload.error) {
+					this.$router.push({
+						path: '/?error=' + encodeURIComponent(payload.error)
+					})
+				}
 				this.diff = payload
 			})
 		},

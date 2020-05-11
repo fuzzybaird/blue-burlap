@@ -151,6 +151,8 @@ ipcMain.on('git-detail', async (event, arg) => {
     const branch = await simpleGit.checkout(arg)  
   } catch (error) {
     console.error(error)
+    event.reply('git-detail', {error: 'Unable to checkout: ' + error.message})
+    return
   }
   
   let diff = [];
@@ -188,6 +190,7 @@ ipcMain.on('git-detail', async (event, arg) => {
     event.reply('git-detail', diff)
   } catch (error) {
     console.error(error)
+    event.reply('git-detail', {error: error.message})
   }
   
 })
@@ -199,8 +202,21 @@ ipcMain.on('commit', async (event, arg) => {
   console.log('arg: ', arg)
 
   let temp = await simpleGit.add(files)
+
+  console.log('temp after add: ', JSON.stringify(temp))
   temp = await simpleGit.commit(arg.message)
-  event.reply('commit', {status:'done'})
+  // NOTE: temp after successful commit: 
+  // {"branch":"experiment","commit":"e1c8985","summary":{"changes":"1","insertions":"1","deletions":"1"},"author":null}
+  // NOTE: temp after commit with no files:
+  // {"branch":"","commit":"","summary":{"changes":0,"insertions":0,"deletions":0},"author":null}
+  console.log('temp after commit: ', JSON.stringify(temp))
+
+  // TODO: Need fancier logic than this.
+  let result = {
+    successful: (temp.commit != ''),
+    ...temp
+  }
+  event.reply('commit', result)
 })
 
 app.on('ready', () => {

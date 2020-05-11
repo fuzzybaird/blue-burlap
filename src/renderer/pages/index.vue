@@ -1,5 +1,8 @@
 <template>
   <div class="container">
+    <b-alert :show="showSuccess()" variant="success">{{ successMessage }}</b-alert>
+    <b-alert :show="showWarning()" variant="warning">{{ warningMessage }}</b-alert>
+    <b-alert :show="showError()" variant="danger">{{ errorMessage}} </b-alert>
     <div class="row">
       <div class="col"><h1>Branches</h1></div>
     </div>
@@ -39,12 +42,27 @@ export default {
   data () {
     return {
       fields: [{key:'name', sortable:true}, {key:'commit'}, {key:'edit'}],
-      branches: []
+      branches: [],
+      successMessage: '',
+      warningMessage: '',
+      errorMessage: ''
     }
   },
   methods: {
-    openURL (url) {
+    openURL(url) {
       remote.shell.openExternal(url)
+    },
+    showSuccess() {
+      this.successMessage = this.$route.query.success
+      return (this.successMessage)
+    },
+    showError() {
+      this.errorMessage = this.$route.query.error
+      return (this.errorMessage)
+    },
+    showWarning() {
+      this.warningMessage = this.$route.query.warning
+      return (this.warningMessage)
     }
   },
   mounted(){
@@ -58,6 +76,10 @@ export default {
 </script>
 
 <style>
+.container {
+  margin-top: 1rem;
+}
+
 .e-nuxt-container {
   min-height: calc(100vh - 50px);
   background: linear-gradient(to right, #ece9e6, #ffffff);
