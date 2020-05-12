@@ -62,14 +62,21 @@ function execShellCommand(cmd) {
   });
 }
 
+ipcMain.on('read-settings', async (event, arg) => {
+  const response = await db.findOne({name:'settings'}, (err, result) => {
+    let data = (result) ? result.data : {}
+    event.reply('read-settings', data)
+  })
+})
+
 ipcMain.on('save-settings', async (event, arg) => {
   const response = await db.update({ name: 'settings' }, { name: 'settings', data: { ...arg }}, { upsert: true }, function (err, numReplaced, upsert) {
     settings = arg
     simpleGit = require('simple-git/promise')(arg.path)
-  })
+  })  
   event.reply('save-settings', { done: true })
   event.reply('message', { type: 'success', message: 'Settings saved.' })
-})
+})  
 
 ipcMain.on('read-options', async (event, arg) => {
   try {
@@ -90,26 +97,37 @@ ipcMain.on('read-options', async (event, arg) => {
       { value: 'CustomObject:Account,CustomObject:Contact,CustomObject:Opportunity', text: 'Standard Objects' },
       { value: 'ApexComponent', text: 'Visualforce Components' },
       { value: 'ApexPage', text: 'Visualforce Pages' },
-    ];
+    ];  
     
     event.reply('read-options', options)
   } catch (err) {
     // TODO: Tell user to log-in or provide a way
     console.error('Error listing auth: ', err)
-  }
-})
-
-ipcMain.on('read-settings', async (event, arg) => {
-  const response = await db.findOne({name:'settings'}, (err, result) => {
-    let data = (result) ? result.data : {}
-    event.reply('read-settings', data)
-  })
-})
+  }  
+})  
 
 ipcMain.on('prune-remote', async(event, arg) => {
   const response = await simpleGit.raw(['remote', 'prune', 'origin'])
   event.reply('prune-remote', { done: true })
   event.reply('message', { type: 'success', message: 'Successfully pruned remote branches.'})
+})
+
+ipcMain.on('prune-local', async(event, arg) => {
+  const response = await simpleGit.branch(['--merged', 'master'])
+  console.log('prune-local:')
+  console.log(response)
+  
+  // TODO: loop on response branches, delete any branch not named master
+
+  event.reply('prune-local', { done: true })
+  event.reply('message', { type: 'success', message: 'Successfully pruned local branches.'})
+})
+
+ipcMain.on('open-org', async (event, arg) => {
+  // Request a sync from Salesforce org; currently only "CustomObject" is pulled back...
+  exec(`${settings.sfdxCommand} force:org:open -u ${settings.org}`, (error, stdout, stderr) => {
+    console.log('Open Org Result: ', stdout)
+  })
 })
 
 ipcMain.on('sync', async (event, arg) => {
@@ -121,10 +139,10 @@ ipcMain.on('sync', async (event, arg) => {
     console.log('Sync Result: ', stdout)
     new Notification({
       title: 'Sync Complete!',
-      body: 'The sync from Salesforce has completed.'
+      body: 'The sync from Salesforce has completed. ' + settings.metadata.length + ' type(s) retrieved.'
     }).show()
     event.reply('sync', {})
-    event.reply('message', { type: 'success', message: 'Sync complete!' })
+    event.reply('message', { type: 'success', message: 'Sync complete! ' + settings.metadata.length + ' type(s) retrieved.' })
   })
 })
 

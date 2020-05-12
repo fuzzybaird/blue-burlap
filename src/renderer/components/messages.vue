@@ -23,18 +23,6 @@ export default {
     };
   },
   methods: {
-    // showSuccess() {
-    //   this.success = this.$route.query.success
-    //   return (this.success)
-    // },
-    // showError() {
-    //   this.error = this.$route.query.error
-    //   return (this.error)
-    // },
-    // showWarning() {
-    //   this.warning = this.$route.query.warning
-    //   return (this.warning)
-    // }
   },
   mounted(){
     ipcRenderer.on('message', (event, payload) => {

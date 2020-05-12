@@ -23,6 +23,18 @@
             <b-form-select v-model="settings.metadata" :options="options.metadata" multiple :select-size="5"></b-form-select>
           </b-col>
         </b-row>
+        <b-row align-v="center">
+          <b-col cols="3" id="tick-interval">
+            Tick Interval
+            <b-tooltip target="tick-interval" placement="bottom" triggers="hover">
+              Sync time is estimated. Use this sliding scale to estimate sync progress. If connection seems slower, pick higher numbers.
+            </b-tooltip>
+          </b-col>
+          <b-col cols="9">
+            <b-form-input v-model="settings.tickInterval" type="range" min="10" max="1000"></b-form-input>
+            <div class="mt-2">Value: {{ settings.tickInterval }}</div>
+          </b-col>
+        </b-row>
       </b-col>
       <b-col>
         <b-row align-v="center">
@@ -35,7 +47,16 @@
         </b-row>
         <b-row align-v="center">
           <b-col cols="2">Clean</b-col>
-          <b-col cols="10"><b-button @click="pruneRemote">Prune Remote Branches</b-button></b-col>
+          <b-col cols="10">
+            <b-button id="prune-remote" @click="pruneRemote">Prune Remote Branches</b-button>
+            <b-tooltip target="prune-remote" placement="bottom" triggers="hover">
+              Removes references to remote branches that no longer exist
+            </b-tooltip>
+            <b-button id="prune-local" @click="pruneLocal">Prune Local Branches</b-button>
+            <b-tooltip target="prune-local" placement="bottom" triggers="hover">
+              Removes local branches that are up-to-date with master
+            </b-tooltip>
+          </b-col>
         </b-row>
       </b-col>
     </b-row>
@@ -69,7 +90,8 @@ export default {
         path: '',
         sfdxCommand: 'sfdx',
         orgType: '',
-        metadata: []
+        metadata: [],
+        tickInterval: 250
       },
       message: {
         
@@ -82,9 +104,9 @@ export default {
     },
     pruneRemote() {
       ipcRenderer.send('prune-remote')
-      this.$router.push({
-        path: '?success=Successfully+pruned+remote+branches.'
-      })
+    },
+    pruneLocal() {
+      ipcRenderer.send('prune-local')
     }
   },
   mounted(){
@@ -100,3 +122,9 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.row {
+  margin: 1rem;
+}
+</style>
