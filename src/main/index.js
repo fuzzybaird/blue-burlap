@@ -67,6 +67,8 @@ ipcMain.on('save-settings', async (event, arg) => {
     settings = arg
     simpleGit = require('simple-git/promise')(arg.path)
   })
+  event.reply('save-settings', { done: true })
+  event.reply('message', { type: 'success', message: 'Settings saved.' })
 })
 
 ipcMain.on('read-options', async (event, arg) => {
@@ -104,20 +106,25 @@ ipcMain.on('read-settings', async (event, arg) => {
   })
 })
 
+ipcMain.on('prune-remote', async(event, arg) => {
+  const response = await simpleGit.raw(['remote', 'prune', 'origin'])
+  event.reply('prune-remote', { done: true })
+  event.reply('message', { type: 'success', message: 'Successfully pruned remote branches.'})
+})
+
 ipcMain.on('sync', async (event, arg) => {
   //exec(`cd ${settings.path}; sfdx force:auth:list --json`, (error, stdout, stderr) => {
   process.chdir(settings.path)
 
-console.log('settings: metadata: ' + settings.metadata)
-
   // Request a sync from Salesforce org; currently only "CustomObject" is pulled back...
-  exec(`${settings.sfdxCommand} force:source:retrieve -u ${settings.org} -m ${settings.metadata}`, (error, stdout, stderr) => {
+  exec(`${settings.sfdxCommand} force:source:retrieve -u ${settings.org} -m ${settings.metadata} --json`, (error, stdout, stderr) => {
     console.log('Sync Result: ', stdout)
     new Notification({
       title: 'Sync Complete!',
       body: 'The sync from Salesforce has completed.'
     }).show()
     event.reply('sync', {})
+    event.reply('message', { type: 'success', message: 'Sync complete!' })
   })
 })
 
@@ -136,7 +143,7 @@ ipcMain.on('git-branches', async (event, arg) => {
     else if (item.current === true) item['_rowVariant'] = 'success'
   })
 
-  console.log(response)
+  // console.log(response)
   event.reply('git-branches', response)
 })
 
@@ -201,22 +208,23 @@ ipcMain.on('commit', async (event, arg) => {
   
   console.log('arg: ', arg)
 
-  let temp = await simpleGit.add(files)
+  let commitResult = await simpleGit.add(files)
 
-  console.log('temp after add: ', JSON.stringify(temp))
-  temp = await simpleGit.commit(arg.message)
-  // NOTE: temp after successful commit: 
+  console.log('temp after add: ', JSON.stringify(commitResult))
+  commitResult = await simpleGit.commit(arg.message)
+  // NOTE: commitResult after successful commit: 
   // {"branch":"experiment","commit":"e1c8985","summary":{"changes":"1","insertions":"1","deletions":"1"},"author":null}
-  // NOTE: temp after commit with no files:
+  // NOTE: commitResult after commit with no files:
   // {"branch":"","commit":"","summary":{"changes":0,"insertions":0,"deletions":0},"author":null}
-  console.log('temp after commit: ', JSON.stringify(temp))
+  console.log('commitResult after commit: ', JSON.stringify(commitResult))
 
   // TODO: Need fancier logic than this.
-  let result = {
-    successful: (temp.commit != ''),
-    ...temp
+  if (commitResult.commit) {
+    event.reply('message', { type: 'success', message:  `Successful commit ${commitResult.commit} (${commitResult.summary.changes} change(s)) on branch ${commitResult.branch}`})
+  } else {
+    event.reply('message', { type: 'error', message: 'Unable to commit to the selected branch at this time. Please check the git status in your console.'})
   }
-  event.reply('commit', result)
+  event.reply('commit', { done: true })
 })
 
 app.on('ready', () => {

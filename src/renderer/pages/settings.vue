@@ -33,6 +33,10 @@
           <b-col cols="2">SFDX</b-col>
           <b-col cols="10"><b-form-input v-model="settings.sfdxCommand" placeholder="sfdx command"></b-form-input></b-col>
         </b-row>
+        <b-row align-v="center">
+          <b-col cols="2">Clean</b-col>
+          <b-col cols="10"><b-button @click="pruneRemote">Prune Remote Branches</b-button></b-col>
+        </b-row>
       </b-col>
     </b-row>
     <b-row align-h="end">
@@ -47,7 +51,7 @@
 
 <script>
 import { remote } from 'electron'
-import { settings } from 'cluster';
+import { settings } from 'cluster'
 const { ipcRenderer } = require('electron')
 
 export default {
@@ -66,12 +70,21 @@ export default {
         sfdxCommand: 'sfdx',
         orgType: '',
         metadata: []
+      },
+      message: {
+        
       }
     }
   },
   methods: {
-    saveSettings () {
+    saveSettings() {
       ipcRenderer.send('save-settings', this.settings)
+    },
+    pruneRemote() {
+      ipcRenderer.send('prune-remote')
+      this.$router.push({
+        path: '?success=Successfully+pruned+remote+branches.'
+      })
     }
   },
   mounted(){

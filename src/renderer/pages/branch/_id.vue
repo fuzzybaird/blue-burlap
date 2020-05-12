@@ -2,7 +2,8 @@
 <b-container>
 	<b-row>
 		<b-col>
-			<h1>Current Diffs in Org</h1>
+			<h1>Current Changes from Org</h1>
+			<h3>Branch: {{ currentBranch }}</h3>
 		</b-col>
 	</b-row>
 	<b-row>
@@ -52,6 +53,7 @@
 		components: {Prism},
 		data() {
 			return {
+				currentBranch: this.$route.params.id,
 				fields: ['✅', {key:'fileDiff'}],
 				diff: [],
 				text: '',
@@ -65,20 +67,7 @@
 			commit () {
 				ipcRenderer.send('commit', this.commitDetail)
 				ipcRenderer.on('commit', (event, payload) => {
-					let target = '/?'
-
-					console.log('payload: ' + JSON.stringify(payload))
-
-					if (payload.successful)	{
-						let message = `Successful commit ${payload.commit} (${payload.summary.changes} change(s)) on branch ${payload.branch}`
-						target += 'success=' + encodeURIComponent(message)
-					} else {
-						target += 'error=' + encodeURIComponent('Unabled to commit to the selected branch at this time. Please check the git status in your console.')
-					}
-
-					this.$router.push({
-						path: target
-					})
+					ipcRenderer.send('git-detail', this.$route.params.id)
 				})
 			}
 		},
