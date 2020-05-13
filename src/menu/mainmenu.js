@@ -1,6 +1,9 @@
 const {Menu, Notification} = require('electron')
 const electron = require('electron')
+//var pjson = require('./package.json');
 const app = electron.app
+const appName = app.getName()
+const appVersion = app.getVersion()
 
 import path from 'path'
 const isDev = process.env.NODE_ENV === 'development'
@@ -148,16 +151,18 @@ const template = [
     submenu: [
       {
         label: 'Learn More',
-        click () { require('electron').shell.openExternal('http://electron.atom.io') }
+        click () { require('electron').shell.openExternal('https://github.com/fuzzybaird/blue-burlap') }
+      },
+      {
+        label: `${appName} ${appVersion}`
       }
     ]
   }
 ]
 
 if (process.platform === 'darwin') {
-  const name = app.getName()
   template.unshift({
-    label: name,
+    label: appName,
     submenu: [
       {
         role: 'about'

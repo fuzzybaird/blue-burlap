@@ -15,10 +15,11 @@
     <b-navbar-nav class="ml-auto">
       <b-nav-text v-if="username">{{ username }}</b-nav-text>
       <b-nav-text v-else>(no org selected)</b-nav-text>
-      <b-button v-if="!loading" @click="sync" :disabled="!username">
+      <b-button id="sync-button" v-if="!loading" @click="sync">
         Sync <!-- <b-badge pill variant="dark">{{ metadataCount }}</b-badge> -->
+        <b-tooltip v-if="!username" target="sync-button" position="left">You cannot Sync until an Org is selected in Settings</b-tooltip>
       </b-button>
-      <b-button v-else disabled>
+      <b-button id="sync-button" v-else disabled>
         Syncing 
         <b-spinner label="Syncing..." small v-if="loading" />
         <b-progress
@@ -49,6 +50,10 @@ export default {
   },
   methods: {
     sync() {
+      if (!this.username) {
+        ipcRenderer.send('message', { type: "warning", message: "You cannot Sync until an Org is selected in Settings" })
+        return
+      }
       console.log('Syncing now! ' + this.metadataCount + ' items')
       ipcRenderer.send('sync', {})
       this.loading = true

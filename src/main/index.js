@@ -15,7 +15,6 @@ db.findOne({name:'settings'}, (err, result) => {
   if (!result) return
   settings = result.data
   if(result.data){
-    console.log('PATH:'+result.data.path)
     simpleGit = require('simple-git/promise')(result.data.path)
   }
 })
@@ -83,31 +82,36 @@ ipcMain.on('save-settings', async (event, arg) => {
 })  
 
 ipcMain.on('read-options', async (event, arg) => {
-  try {
-    const output = await execShellCommand(`${settings.sfdxCommand} force:auth:list --json`)
-    let options = {}
-    console.log('auth list output: ', output)
-    options.orgs = JSON.parse(output).result
+  let options = {}
+  
+  if (settings.sfdxCommand) {
+    try {
+      const output = await execShellCommand(`${settings.sfdxCommand} force:auth:list --json`)
+      //console.log('auth list output: ', output)
+      options.orgs = JSON.parse(output).result
+    } catch (err) {
+      // TODO: Tell user to log-in or provide a way
+      console.error('Error listing auth: ', err)
+    }
+  } else {
+    event.reply('message', { type: 'warning', message: 'Unable to get Org list from sfdx command. Please configure SFDX.' })
+  }
     
-    // TODO: read metadata types from e.g.: ./.sfdx/orgs/{USERNAME}/metadataTypeInfos.json
-    options.metadata = [
-      { value: 'ApexClass', text: 'Apex Classes' },
-      { value: 'CustomField', text: 'Custom Fields' },
-      { value: 'CustomLabel', text: 'Custom Labels' },
-      { value: 'CustomObject', text: 'Custom Objects' },
-      { value: 'GlobalValueSet', text: 'Global Value Sets' },
-      { value: 'Layout', text: 'Layouts' },
-      { value: 'ListView', text: 'List Views' },
-      { value: 'CustomObject:Account,CustomObject:Contact,CustomObject:Opportunity', text: 'Standard Objects' },
-      { value: 'ApexComponent', text: 'Visualforce Components' },
-      { value: 'ApexPage', text: 'Visualforce Pages' },
-    ];  
-    
-    event.reply('read-options', options)
-  } catch (err) {
-    // TODO: Tell user to log-in or provide a way
-    console.error('Error listing auth: ', err)
-  }  
+  // TODO: read metadata types from e.g.: ./.sfdx/orgs/{USERNAME}/metadataTypeInfos.json
+  options.metadata = [
+    { value: 'ApexClass', text: 'Apex Classes' },
+    { value: 'CustomField', text: 'Custom Fields' },
+    { value: 'CustomLabel', text: 'Custom Labels' },
+    { value: 'CustomObject', text: 'Custom Objects' },
+    { value: 'GlobalValueSet', text: 'Global Value Sets' },
+    { value: 'Layout', text: 'Layouts' },
+    { value: 'ListView', text: 'List Views' },
+    { value: 'CustomObject:Account,CustomObject:Contact,CustomObject:Opportunity', text: 'Standard Objects' },
+    { value: 'ApexComponent', text: 'Visualforce Components' },
+    { value: 'ApexPage', text: 'Visualforce Pages' },
+  ];  
+  
+  event.reply('read-options', options)
 })  
 
 ipcMain.on('prune-remote', async(event, arg) => {
@@ -150,6 +154,12 @@ ipcMain.on('open-org', async (event, arg) => {
 
 ipcMain.on('sync', async (event, arg) => {
   //exec(`cd ${settings.path}; sfdx force:auth:list --json`, (error, stdout, stderr) => {
+  if (!settings.path) {
+    event.reply('message', { type: 'warning', message: 'You must configure the path of the project, in Settings' })
+    event.reply('sync', {})
+    return
+  }
+
   process.chdir(settings.path)
 
   // Request a sync from Salesforce org; currently only "CustomObject" is pulled back...
