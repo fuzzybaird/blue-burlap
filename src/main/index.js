@@ -114,10 +114,19 @@ ipcMain.on('prune-remote', async(event, arg) => {
 
 ipcMain.on('prune-local', async(event, arg) => {
   const response = await simpleGit.branch(['--merged', 'master'])
-  console.log('prune-local:')
-  console.log(response)
+  //console.log('prune-local:')
+  //console.log(response)
   
-  // TODO: loop on response branches, delete any branch not named master
+  for (let branch in response.branches) {
+    if (branch === 'master') continue
+    if (response.branches.hasOwnProperty(branch)) {
+      //console.log(response.branches[branch])
+      const deleteResponse = await simpleGit.branch(['-D', branch])
+      //console.log(deleteResponse)
+    }
+  }
+  
+  // TODO: handle failure to delete or other warnings
 
   event.reply('prune-local', { done: true })
   event.reply('message', { type: 'success', message: 'Successfully pruned local branches.'})

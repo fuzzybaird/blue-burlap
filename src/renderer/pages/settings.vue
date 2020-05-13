@@ -124,7 +124,7 @@ export default {
 </script>
 
 <style scoped>
-.row {
-  margin: 1rem;
+.row, .btn {
+  margin: 0.5rem;
 }
 </style>
