@@ -1,7 +1,7 @@
 {
   "name": "Blue-Burlap",
-  "version": "0.1.0",
-  "description": "Simplify Salesforce development with Git",
+  "version": "0.2.0",
+  "description": "Simplify Salesforce Admin Development with Git",
   "main": "./dist/main/index.js",
   "scripts": {
     "dev": "node .electron-nuxt/check-engines.js && cross-env-shell NODE_ENV=development node .electron-nuxt/index.js",
@@ -17,7 +17,7 @@
   "keywords": [],
   "author": "Eli Baird <eli.baird@chghealthcare.com>",
   "license": "MIT",
-  "homepage": "https://github.com/michalzaq12/electron-nuxt/blob/master/README.md",
+  "homepage": "https://github.com/fuzzybaird/blue-burlap/blob/master/README.md",
   "engines": {
     "node": ">=12.13.0"
   },
