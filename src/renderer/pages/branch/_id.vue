@@ -67,19 +67,18 @@
 			commit () {
 				ipcRenderer.send('commit', this.commitDetail)
 				ipcRenderer.on('commit', (event, payload) => {
-					ipcRenderer.send('git-detail', this.$route.params.id)
+					this.commitDetail.message = ''
+					ipcRenderer.send('git-detail', this.currentBranch)
 				})
 			}
 		},
 		mounted(){
-			ipcRenderer.send('git-detail', this.$route.params.id)
+			ipcRenderer.send('git-detail', this.currentBranch)
 			ipcRenderer.on('git-detail', (event, payload) => {
-				if (payload.error) {
-					this.$router.push({
-						path: '/?error=' + encodeURIComponent(payload.error)
-					})
-				}
 				this.diff = payload
+			})
+			ipcRenderer.on('sync', (event, payload) => {
+				ipcRenderer.send('git-detail', this.currentBranch)
 			})
 		},
 	}

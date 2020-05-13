@@ -1,10 +1,10 @@
 <template>
-  <div class="container">
-    <div class="row">
-      <div class="col"><h1>Branches</h1></div>
-    </div>
-    <div class="row">
-      <div class="col">
+  <b-container>
+    <b-row>
+      <b-col><h1>Branches</h1></b-col>
+    </b-row>
+    <b-row>
+      <b-col>
         <b-table head-variant="light" striped hover :items="branches" :fields="fields">
           <template v-slot:cell(edit)="row">
             <nuxt-link
@@ -23,12 +23,17 @@
             >
           </template>
         </b-table>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col"><h2>Create New Branch</h2></div>
-    </div>
-  </div>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col><h2>Create New Branch</h2></b-col>
+    </b-row>
+    <b-row align-v="center">
+      <b-col cols="1">Name</b-col>
+      <b-col cols="7"><b-input v-model="newBranch" placeholder="new-branch-name"></b-input></b-col>
+      <b-col cols="3"><b-button @click="createBranch">Create</b-button></b-col>
+    </b-row>
+  </b-container>
 </template>
 
 <script>
@@ -42,12 +47,16 @@ export default {
   data () {
     return {
       fields: [{key:'name', sortable:true}, {key:'commit'}, {key:'edit'}],
-      branches: []
+      branches: [],
+      newBranch: ''
     }
   },
   methods: {
     openURL(url) {
       remote.shell.openExternal(url)
+    },
+    createBranch() {
+      ipcRenderer.send('create-branch', { branch: this.newBranch })
     }
   },
   mounted(){
@@ -55,6 +64,10 @@ export default {
     ipcRenderer.on('git-branches', (event, payload) => {
       console.log(payload)
       this.branches = Object.values(payload.branches)
+    })
+    ipcRenderer.on('create-branch', (event, payload) => {
+      ipcRenderer.send('git-branches')
+      this.newBranch = ''
     })
   },
 }

@@ -62,6 +62,10 @@ function execShellCommand(cmd) {
   });
 }
 
+ipcMain.on('message', async (event, arg) => {
+  event.reply('message', arg)
+})
+
 ipcMain.on('read-settings', async (event, arg) => {
   const response = await db.findOne({name:'settings'}, (err, result) => {
     let data = (result) ? result.data : {}
@@ -117,13 +121,18 @@ ipcMain.on('prune-local', async(event, arg) => {
   //console.log('prune-local:')
   //console.log(response)
   
-  for (let branch in response.branches) {
-    if (branch === 'master') continue
-    if (response.branches.hasOwnProperty(branch)) {
-      //console.log(response.branches[branch])
-      const deleteResponse = await simpleGit.branch(['-D', branch])
-      //console.log(deleteResponse)
+  try {
+    for (let branch in response.branches) {
+      if (branch === 'master') continue
+      if (response.branches.hasOwnProperty(branch)) {
+        //console.log(response.branches[branch])
+        const deleteResponse = await simpleGit.branch(['-D', branch])
+        //console.log(deleteResponse)
+      }
     }
+  } catch (error) {
+    console.log(error)
+    event.reply('message', { type: 'error', message: 'Unable to prune all local branches. Check out "master", then try again. System response: ' + error})
   }
   
   // TODO: handle failure to delete or other warnings
@@ -226,24 +235,37 @@ ipcMain.on('git-detail', async (event, arg) => {
     console.error(error)
     event.reply('git-detail', {error: error.message})
   }
-  
+})
+
+ipcMain.on('create-branch', async (event, arg) => {
+  console.log('Create branch')
+  console.log(arg)
+
+  if (!arg.branch) {
+    event.reply('message', { type: 'warning', message: 'Specify a name to create a new branch' })
+    return
+  }
+
+  let response = await simpleGit.checkout(['-b', arg.branch])
+  event.reply('message', { type: 'success', message: `Successfully created ${arg.branch}` })
+  event.reply('create-branch', { done: true })
 })
 
 ipcMain.on('commit', async (event, arg) => {
-  console.log('commit!')
+  //console.log('commit!')
   const files = arg.selectedFiles
   
-  console.log('arg: ', arg)
+  //console.log('arg: ', arg)
 
   let commitResult = await simpleGit.add(files)
 
-  console.log('temp after add: ', JSON.stringify(commitResult))
+  //console.log('temp after add: ', JSON.stringify(commitResult))
   commitResult = await simpleGit.commit(arg.message)
   // NOTE: commitResult after successful commit: 
   // {"branch":"experiment","commit":"e1c8985","summary":{"changes":"1","insertions":"1","deletions":"1"},"author":null}
   // NOTE: commitResult after commit with no files:
   // {"branch":"","commit":"","summary":{"changes":0,"insertions":0,"deletions":0},"author":null}
-  console.log('commitResult after commit: ', JSON.stringify(commitResult))
+  //console.log('commitResult after commit: ', JSON.stringify(commitResult))
 
   // TODO: Need fancier logic than this.
   if (commitResult.commit) {
