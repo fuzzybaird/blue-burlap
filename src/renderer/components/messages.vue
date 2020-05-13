@@ -9,12 +9,6 @@
 const { ipcRenderer } = require('electron')
 export default {
   name: 'messages',
-  // props: {
-  //   success: {
-  //     required: true,
-      
-  //   }
-  // },
   data() {
     return {
       success: '',

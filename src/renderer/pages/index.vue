@@ -62,7 +62,6 @@ export default {
   mounted(){
     ipcRenderer.send('git-branches')
     ipcRenderer.on('git-branches', (event, payload) => {
-      console.log(payload)
       this.branches = Object.values(payload.branches)
     })
     ipcRenderer.on('create-branch', (event, payload) => {

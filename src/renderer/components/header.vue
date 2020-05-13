@@ -13,11 +13,12 @@
     </b-navbar-nav>
      
     <b-navbar-nav class="ml-auto">
-      <b-nav-text>{{ username }}</b-nav-text>
-      <b-button v-if="!loading" @click="sync">
+      <b-nav-text v-if="username">{{ username }}</b-nav-text>
+      <b-nav-text v-else>(no org selected)</b-nav-text>
+      <b-button v-if="!loading" @click="sync" :disabled="!username">
         Sync <!-- <b-badge pill variant="dark">{{ metadataCount }}</b-badge> -->
       </b-button>
-      <b-button v-else disabled="disabled">
+      <b-button v-else disabled>
         Syncing 
         <b-spinner label="Syncing..." small v-if="loading" />
         <b-progress
@@ -65,6 +66,11 @@ export default {
     }
   },
   mounted(){
+    ipcRenderer.on('navigate', (event, payload) => {
+      this.$router.push({
+        path: payload.target
+      })      
+    })
     ipcRenderer.on('sync', (event, payload) => {
       console.log('Done syncing.')
       this.loading = false

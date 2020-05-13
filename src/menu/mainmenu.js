@@ -13,26 +13,9 @@ const template = [
     label: 'File',
     submenu: [
       {
-        label: 'Notification Test',
-        click (item, focusedWindow) {
-          console.log('About to create a test notification...')
-          console.log('Notification.isSupported() = ' + Notification.isSupported())
-          new Notification({
-            title: 'Test Notification!',
-            body: 'This is the body of the test notification. Hopefully you can see it.'
-          }).show()
-          
-          // This isn't working on Windows 10...
-          // myNotification.onclick = () => {
-          //   console.log('Notification clicked')
-          // }
-          //myNotification.show()
-        }
-      },
-      {
         label: 'Settings',
         click (item, focusedWindow) {
-          focusedWindow.loadURL(`${baseUrl}/#/settings`)
+          focusedWindow.send('navigate', {target: '/settings' })
         }
       },
       {
@@ -69,6 +52,46 @@ const template = [
       },
       {
         role: 'selectall'
+      }
+    ]
+  },
+  {
+    label: 'Debug',
+    submenu: [
+      {
+        label: 'Notification Test',
+        click (item, focusedWindow) {
+          console.log('About to create a test notification...')
+          console.log('Notification.isSupported() = ' + Notification.isSupported())
+          new Notification({
+            title: 'Test Notification!',
+            body: 'This is the body of the test notification. Hopefully you can see it.'
+          }).show()
+          
+          // This isn't working on Windows 10...
+          // myNotification.onclick = () => {
+          //   console.log('Notification clicked')
+          // }
+          //myNotification.show()
+        }
+      },
+      {
+        label: "Alert Test: Success",
+        click (item, focusedWindow) {
+          focusedWindow.send('message', { type: 'success', message: 'Testing success message'} )
+        }
+      },
+      {
+        label: "Alert Test: Warning",
+        click (item, focusedWindow) {
+          focusedWindow.send('message', { type: 'warning', message: 'Testing warning message'} )
+        }
+      },
+      {
+        label: "Alert Test: Error",
+        click (item, focusedWindow) {
+          focusedWindow.send('message', { type: 'error', message: 'Testing error message'} )
+        }
       }
     ]
   },
