@@ -75,6 +75,10 @@
 		mounted(){
 			ipcRenderer.send('git-detail', this.currentBranch)
 			ipcRenderer.on('git-detail', (event, payload) => {
+				if (payload.error) {
+					this.$router.push({ path: '/' })   
+					return
+				}
 				this.diff = payload
 			})
 			ipcRenderer.on('sync', (event, payload) => {

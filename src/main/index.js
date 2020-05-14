@@ -121,11 +121,9 @@ ipcMain.on('prune-remote', async(event, arg) => {
 })
 
 ipcMain.on('prune-local', async(event, arg) => {
-  const response = await simpleGit.branch(['--merged', 'master'])
-  //console.log('prune-local:')
-  //console.log(response)
-  
   try {
+    const response = await simpleGit.branch(['--merged', 'master'])
+
     for (let branch in response.branches) {
       if (branch === 'master') continue
       if (response.branches.hasOwnProperty(branch)) {
@@ -134,15 +132,26 @@ ipcMain.on('prune-local', async(event, arg) => {
         //console.log(deleteResponse)
       }
     }
+
+    event.reply('message', { type: 'success', message: 'Successfully pruned local branches.'})
   } catch (error) {
     console.log(error)
     event.reply('message', { type: 'error', message: 'Unable to prune all local branches. Check out "master", then try again. System response: ' + error})
   }
   
-  // TODO: handle failure to delete or other warnings
-
   event.reply('prune-local', { done: true })
-  event.reply('message', { type: 'success', message: 'Successfully pruned local branches.'})
+})
+
+ipcMain.on('discard-local', async(event, arg) => {
+  try {
+    const response = await simpleGit.checkout(['.'])
+    console.log('discard local changes: ', response)
+    event.reply('message', { type: 'success', message: 'Successfully removed all local changes.' })
+  } catch (error) {
+    event.reply('message', { type: 'error', message: 'Unable to discard local changes. System response: ' + error })
+  }
+
+  event.reply('discard-local', { done: true })
 })
 
 ipcMain.on('open-org', async (event, arg) => {
@@ -163,14 +172,15 @@ ipcMain.on('sync', async (event, arg) => {
   process.chdir(settings.path)
 
   // Request a sync from Salesforce org; currently only "CustomObject" is pulled back...
-  exec(`${settings.sfdxCommand} force:source:retrieve -u ${settings.org} -m ${settings.metadata} --json`, (error, stdout, stderr) => {
-    console.log('Sync Result: ', stdout)
+  exec(`${settings.sfdxCommand} force:source:retrieve -u ${settings.org} -m ${settings.metadata} --json`, (error, syncResult, stderr) => {
+    syncResult = JSON.parse(syncResult)
+    console.log('Sync Result: ', syncResult)
     new Notification({
       title: 'Sync Complete!',
-      body: 'The sync from Salesforce has completed. ' + settings.metadata.length + ' type(s) retrieved.'
+      body: 'The sync from Salesforce has completed. ' + settings.metadata.length + ' type(s) retrieved. ' + syncResult.result.inboundFiles.length + ' file(s) retrieved.'
     }).show()
     event.reply('sync', {})
-    event.reply('message', { type: 'success', message: 'Sync complete! ' + settings.metadata.length + ' type(s) retrieved.' })
+    event.reply('message', { type: 'success', message: 'Sync complete! ' + settings.metadata.length + ' type(s) retrieved. ' + syncResult.result.inboundFiles.length + ' file(s) retrieved.' })
   })
 })
 
@@ -204,7 +214,8 @@ ipcMain.on('git-detail', async (event, arg) => {
     const branch = await simpleGit.checkout(arg)  
   } catch (error) {
     console.error(error)
-    event.reply('git-detail', {error: 'Unable to checkout: ' + error.message})
+    event.reply('git-detail', { error: true } )
+    event.reply('message', {type: 'error', message: 'Unable to checkout: ' + error.message})
     return
   }
   
@@ -212,13 +223,13 @@ ipcMain.on('git-detail', async (event, arg) => {
   //exec('ls -la', (error, stdout, stderr) => {console.log(stdout)})
   
   try {
-    let temp = await simpleGit.status()
+    let statusResult = await simpleGit.status()
     
-    // console.log('temp: ', temp)
+    console.log('statusResult: ', statusResult)
     
-    await Promise.all(temp.files.map(async (file) => {
+    await Promise.all(statusResult.files.map(async (file) => {
       file.path = file.path.replace(/"/g, '')
-      console.log('file: ' + file.path)
+      //console.log('file: ' + file.path)
       let fileDiff = null
       
       if (file.index === '?') {
@@ -238,7 +249,7 @@ ipcMain.on('git-detail', async (event, arg) => {
     console.log(diff)
     
     // Get also diffs for untracked files...
-    temp = await simpleGit.status()
+    //statusResult = await simpleGit.status()
     
     event.reply('git-detail', diff)
   } catch (error) {

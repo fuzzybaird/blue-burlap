@@ -58,6 +58,10 @@
             <b-tooltip target="prune-local" placement="bottom" triggers="hover">
               Removes local branches that are up-to-date with master
             </b-tooltip>
+            <b-button id="discard-local" @click="discardLocal">Discard Local Changes <b-spinner v-if="discardingLocal" small></b-spinner></b-button>
+            <b-tooltip target="discard-local" placement="bottom" triggers="hover">
+              Discards all local changes that haven't been committed
+            </b-tooltip>
           </b-col>
         </b-row>
       </b-col>
@@ -93,7 +97,8 @@ export default {
         tickInterval: 250
       },
       pruningRemote: false,
-      pruningLocal: false
+      pruningLocal: false,
+      discardingLocal: false
     }
   },
   methods: {
@@ -107,6 +112,10 @@ export default {
     pruneLocal() {
       ipcRenderer.send('prune-local')
       this.pruningLocal = true
+    },
+    discardLocal() {
+      ipcRenderer.send('discard-local')
+      this.discardingLocal = true
     }
   },
   mounted(){
@@ -124,6 +133,9 @@ export default {
     })
     ipcRenderer.on('prune-local', (event, payload) => {
       this.pruningLocal = false
+    })
+    ipcRenderer.on('discard-local', (event, payload) => {
+      this.discardingLocal = false
     })
 
     ipcRenderer.send('read-settings')
