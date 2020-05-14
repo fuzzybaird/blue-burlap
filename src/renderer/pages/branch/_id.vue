@@ -2,12 +2,20 @@
 <b-container>
 	<b-row>
 		<b-col>
-			<h1>Current Changes from Org</h1>
-			<h3>Branch: {{ currentBranch }}</h3>
+			<h1>Branch: {{ currentBranch }}</h1>
 		</b-col>
 	</b-row>
 	<b-row>
 		<b-col>
+			<h3>Status</h3>
+			Ahead: {{ status.ahead }} Behind: {{ status.behind }} Tracking: {{ status.tracking }}
+			<b-button v-if="status.behind">Pull</b-button>
+			<b-button v-if="status.ahead || !status.tracking">Push</b-button>
+		</b-col>
+	</b-row>
+	<b-row>
+		<b-col>
+			<h3>Current Changes</h3>
 			<b-form-checkbox-group id="selected-files" v-model="commitDetail.selectedFiles" name="selectedFiles">
 				<b-table head-variant="light" striped hover :items="diff" :fields="fields">
 					<template v-slot:cell(✅)="row">
@@ -35,7 +43,6 @@
 				max-rows="6"
 				></b-form-textarea>
 			<b-button @click="commit">Commit</b-button>
-			<b-button>Cancel</b-button>
 		</b-col>
 	</b-row>
 </b-container>
@@ -56,6 +63,7 @@
 				currentBranch: this.$route.params.id,
 				fields: ['✅', {key:'fileDiff'}],
 				diff: [],
+				status: {},
 				text: '',
 				commitDetail: {
 					message: '',
@@ -79,7 +87,8 @@
 					this.$router.push({ path: '/' })   
 					return
 				}
-				this.diff = payload
+				this.diff = payload.diff
+				this.status = payload.status
 			})
 			ipcRenderer.on('sync', (event, payload) => {
 				ipcRenderer.send('git-detail', this.currentBranch)

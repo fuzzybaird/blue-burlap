@@ -220,14 +220,13 @@ ipcMain.on('git-detail', async (event, arg) => {
   }
   
   let diff = [];
-  //exec('ls -la', (error, stdout, stderr) => {console.log(stdout)})
   
   try {
-    let statusResult = await simpleGit.status()
+    let status = await simpleGit.status()
     
-    console.log('statusResult: ', statusResult)
+    console.log('statusResult: ', status)
     
-    await Promise.all(statusResult.files.map(async (file) => {
+    await Promise.all(status.files.map(async (file) => {
       file.path = file.path.replace(/"/g, '')
       //console.log('file: ' + file.path)
       let fileDiff = null
@@ -251,7 +250,7 @@ ipcMain.on('git-detail', async (event, arg) => {
     // Get also diffs for untracked files...
     //statusResult = await simpleGit.status()
     
-    event.reply('git-detail', diff)
+    event.reply('git-detail', { diff, status })
   } catch (error) {
     console.error(error)
     event.reply('git-detail', {error: error.message})
