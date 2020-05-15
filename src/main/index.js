@@ -9,6 +9,8 @@ let Datastore = require('nedb')
 let db = new Datastore({ filename: DATAFILE_PATH, autoload: true })
 
 let settings = {}
+const longTimer = 10
+const shortTimer = 5
 
 let simpleGit = require('simple-git/promise')('./')
 db.findOne({name:'settings'}, (err, result) => {
@@ -78,7 +80,7 @@ ipcMain.on('save-settings', async (event, arg) => {
     simpleGit = require('simple-git/promise')(arg.path)
   })  
   event.reply('save-settings', { done: true })
-  event.reply('message', { type: 'success', message: 'Settings saved.' })
+  event.reply('message', { type: 'success', message: 'Settings saved.', timer: shortTimer })
 })  
 
 ipcMain.on('read-options', async (event, arg) => {
@@ -94,7 +96,7 @@ ipcMain.on('read-options', async (event, arg) => {
       console.error('Error listing auth: ', err)
     }
   } else {
-    event.reply('message', { type: 'warning', message: 'Unable to get Org list from sfdx command. Please configure SFDX.' })
+    event.reply('message', { type: 'warning', message: 'Unable to get Org list from sfdx command. Please configure SFDX.', timer: longTimer })
   }
     
   // TODO: read metadata types from e.g.: ./.sfdx/orgs/{USERNAME}/metadataTypeInfos.json
@@ -117,7 +119,7 @@ ipcMain.on('read-options', async (event, arg) => {
 ipcMain.on('prune-remote', async(event, arg) => {
   const response = await simpleGit.raw(['remote', 'prune', 'origin'])
   event.reply('prune-remote', { done: true })
-  event.reply('message', { type: 'success', message: 'Successfully pruned remote branches.'})
+  event.reply('message', { type: 'success', message: 'Successfully pruned remote branches.', timer: shortTimer})
 })
 
 ipcMain.on('prune-local', async(event, arg) => {
@@ -133,7 +135,7 @@ ipcMain.on('prune-local', async(event, arg) => {
       }
     }
 
-    event.reply('message', { type: 'success', message: 'Successfully pruned local branches.'})
+    event.reply('message', { type: 'success', message: 'Successfully pruned local branches.', timer: shortTimer})
   } catch (error) {
     console.log(error)
     event.reply('message', { type: 'error', message: 'Unable to prune all local branches. Check out "master", then try again. System response: ' + error})
@@ -146,7 +148,7 @@ ipcMain.on('discard-local', async(event, arg) => {
   try {
     const response = await simpleGit.checkout(['.'])
     console.log('discard local changes: ', response)
-    event.reply('message', { type: 'success', message: 'Successfully removed all local changes.' })
+    event.reply('message', { type: 'success', message: 'Successfully removed all local changes.', timer: shortTimer })
   } catch (error) {
     event.reply('message', { type: 'error', message: 'Unable to discard local changes. System response: ' + error })
   }
@@ -164,7 +166,7 @@ ipcMain.on('open-org', async (event, arg) => {
 ipcMain.on('sync', async (event, arg) => {
   //exec(`cd ${settings.path}; sfdx force:auth:list --json`, (error, stdout, stderr) => {
   if (!settings.path) {
-    event.reply('message', { type: 'warning', message: 'You must configure the path of the project, in Settings' })
+    event.reply('message', { type: 'warning', message: 'You must configure the path of the project, in Settings', timer: longTimer })
     event.reply('sync', {})
     return
   }
@@ -180,7 +182,7 @@ ipcMain.on('sync', async (event, arg) => {
       body: 'The sync from Salesforce has completed. ' + settings.metadata.length + ' type(s) retrieved. ' + syncResult.result.inboundFiles.length + ' file(s) retrieved.'
     }).show()
     event.reply('sync', {})
-    event.reply('message', { type: 'success', message: 'Sync complete! ' + settings.metadata.length + ' type(s) retrieved. ' + syncResult.result.inboundFiles.length + ' file(s) retrieved.' })
+    event.reply('message', { type: 'success', message: 'Sync complete! ' + settings.metadata.length + ' type(s) retrieved. ' + syncResult.result.inboundFiles.length + ' file(s) retrieved.', timer: longTimer })
   })
 })
 
@@ -262,12 +264,12 @@ ipcMain.on('create-branch', async (event, arg) => {
   console.log(arg)
 
   if (!arg.branch) {
-    event.reply('message', { type: 'warning', message: 'Specify a name to create a new branch' })
+    event.reply('message', { type: 'warning', message: 'Specify a name to create a new branch', timer: shortTimer })
     return
   }
 
   let response = await simpleGit.checkout(['-b', arg.branch])
-  event.reply('message', { type: 'success', message: `Successfully created ${arg.branch}` })
+  event.reply('message', { type: 'success', message: `Successfully created ${arg.branch}`, timer: shortTimer })
   event.reply('create-branch', { done: true })
 })
 
@@ -280,7 +282,7 @@ ipcMain.on('git-push', async (event, arg) => {
 
   try {
     const pushResult = await simpleGit.push('origin', arg.branchName, { '--set-upstream': null })
-    event.reply('message', { type: 'success', message: 'Successfully pushed to origin/' + arg.branchName })
+    event.reply('message', { type: 'success', message: 'Successfully pushed to origin/' + arg.branchName, timer: longTimer })
   } catch (error) {
     result.error = true
     event.reply('message', { type: 'error', message: 'Unable to push: ' + error })
@@ -307,7 +309,7 @@ ipcMain.on('commit', async (event, arg) => {
 
   // TODO: Need fancier logic than this.
   if (commitResult.commit) {
-    event.reply('message', { type: 'success', message:  `Successful commit ${commitResult.commit} (${commitResult.summary.changes} change(s)) on branch ${commitResult.branch}`})
+    event.reply('message', { type: 'success', message:  `Successful commit ${commitResult.commit} (${commitResult.summary.changes} change(s)) on branch ${commitResult.branch}`, timer: longTimer})
   } else {
     event.reply('message', { type: 'error', message: 'Unable to commit to the selected branch at this time. Please check the git status in your console.'})
   }

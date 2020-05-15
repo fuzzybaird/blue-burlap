@@ -85,15 +85,33 @@ const template = [
         }
       },
       {
+        label: "Alert Test: Success (5 secs)",
+        click (item, focusedWindow) {
+          focusedWindow.send('message', { type: 'success', message: 'Testing success message', timer: 5} )
+        }
+      },
+      {
         label: "Alert Test: Warning",
         click (item, focusedWindow) {
           focusedWindow.send('message', { type: 'warning', message: 'Testing warning message'} )
         }
       },
       {
+        label: "Alert Test: Warning (5 secs)",
+        click (item, focusedWindow) {
+          focusedWindow.send('message', { type: 'warning', message: 'Testing warning message', timer: 5} )
+        }
+      },
+      {
         label: "Alert Test: Error",
         click (item, focusedWindow) {
           focusedWindow.send('message', { type: 'error', message: 'Testing error message'} )
+        }
+      },
+      {
+        label: "Alert Test: Error (5 secs)",
+        click (item, focusedWindow) {
+          focusedWindow.send('message', { type: 'error', message: 'Testing error message', timer: 5} )
         }
       }
     ]
