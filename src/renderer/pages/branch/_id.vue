@@ -8,10 +8,19 @@
 	<b-row>
 		<b-col>
 			<h3>Status</h3>
-			Ahead: {{ status.ahead }} Behind: {{ status.behind }} Tracking: {{ status.tracking }}
-			<b-button v-if="status.behind">Pull</b-button>
-			<b-button v-if="status.ahead || !status.tracking">Push</b-button>
 		</b-col>
+	</b-row>
+	<b-row>
+		<b-col cols="1">Behind:</b-col>
+		<b-col cols="1">{{ status.behind }}</b-col>
+		<b-col cols="1">Ahead:</b-col>
+		<b-col cols="1">{{ status.ahead }}</b-col>
+		<b-col cols="1">Tracking:</b-col>
+		<b-col cols="4">{{ status.tracking }}<div v-if="!status.tracking">(not tracked remotely yet)</div></b-col>
+	</b-row>
+	<b-row>
+		<b-col cols="2"><b-button v-if="status.behind">Pull</b-button></b-col>
+		<b-col cols="2"><b-button v-if="!status.behind && (status.ahead || !status.tracking)">Push</b-button></b-col>
 	</b-row>
 	<b-row>
 		<b-col>
@@ -42,6 +51,10 @@
 				rows="3"
 				max-rows="6"
 				></b-form-textarea>
+		</b-col>
+	</b-row>
+	<b-row>
+		<b-col>
 			<b-button @click="commit">Commit</b-button>
 		</b-col>
 	</b-row>
@@ -101,4 +114,7 @@
 @import url('../../../resources/prism.css');
 @import url('../../../resources/prism-coy.css');
 @import url('../../../resources/prism-diff-highlight.css');
+.row {
+	margin: 0.5rem;
+}
 </style>
