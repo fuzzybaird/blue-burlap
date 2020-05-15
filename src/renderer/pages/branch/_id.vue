@@ -97,8 +97,8 @@
 		},
 		methods: {
 			gitPull () {
-				ipcRenderer.send('message', { type: 'success', message: 'Pull completed.' })
-				//this.isPulling = true
+				ipcRenderer.send('git-pull', { branchName: this.currentBranch })
+				this.isPulling = true
 			},
 			gitPush () {
 				ipcRenderer.send('git-push', { branchName: this.currentBranch })
@@ -127,11 +127,11 @@
 				ipcRenderer.send('git-detail', this.currentBranch)
 				this.loadingDetail = true
 			})
-				ipcRenderer.on('git-pull', (event, payload) => {
-					this.isPulling = false
-					this.loadingDetail = true
-					ipcRenderer.send('git-detail', this.currentBranch)
-				})
+			ipcRenderer.on('git-pull', (event, payload) => {
+				this.isPulling = false
+				this.loadingDetail = true
+				ipcRenderer.send('git-detail', this.currentBranch)
+			})
 			ipcRenderer.on('git-push', (event, payload) => {
 				this.isPushing = false
 				this.loadingDetail = true

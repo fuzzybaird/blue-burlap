@@ -274,7 +274,17 @@ ipcMain.on('create-branch', async (event, arg) => {
 })
 
 ipcMain.on('git-pull', async (event, arg) => {
+  let result = {}
   
+  try {
+    const pushResult = await simpleGit.pull('origin', arg.branchName)
+    event.reply('message', { type: 'success', message: 'Successfully pulled from origin/' + arg.branchName, timer: longTimer })
+  } catch (error) {
+    result.error = true
+    event.reply('message', { type: 'error', message: 'Unable to pull: ' + error })
+  }
+  
+  event.reply('git-pull', result)
 })
 
 ipcMain.on('git-push', async (event, arg) => {
