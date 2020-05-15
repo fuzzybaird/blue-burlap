@@ -7,26 +7,43 @@
 	</b-row>
 	<b-row>
 		<b-col>
-			<h3>Status</h3>
+			<h3>Status <b-button @click="refresh">Refresh</b-button></h3>
 		</b-col>
 	</b-row>
 	<b-row>
-		<b-col cols="1">Behind:</b-col>
-		<b-col cols="1">{{ status.behind }}</b-col>
-		<b-col cols="1">Ahead:</b-col>
-		<b-col cols="1">{{ status.ahead }}</b-col>
-		<b-col cols="1">Tracking:</b-col>
-		<b-col cols="4">{{ status.tracking }}<div v-if="!status.tracking">(not tracked remotely yet)</div></b-col>
-	</b-row>
-	<b-row>
-		<b-col cols="2"><b-button v-if="status.behind" @click="gitPull">Pull</b-button></b-col>
-		<b-col cols="2"><b-button v-if="!status.behind && (status.ahead || !status.tracking)" @click="gitPush">Push <b-spinner v-if="isPushing" small></b-spinner></b-button></b-col>
+		<b-table-simple>
+			<b-thead>
+				<b-th>Behind</b-th>
+				<b-th>Ahead</b-th>
+				<b-th>Tracking</b-th>
+			</b-thead>
+			<b-tr>
+				<b-td>{{ status.behind }}</b-td>
+				<b-td>{{ status.ahead }}</b-td>
+				<b-td>{{ status.tracking }}</b-td>
+			</b-tr>
+			<b-tr v-if="status.behind || status.ahead || !status.tracking">
+				<b-td>
+					<b-button v-if="status.behind" @click="gitPull">
+						Pull
+						<b-spinner v-if="isPulling" small></b-spinner>
+					</b-button>
+				</b-td>
+				<b-td>
+					<b-button v-if="!status.behind && (status.ahead || !status.tracking)" @click="gitPush">
+						Push 
+						<b-spinner v-if="isPushing" small></b-spinner>
+					</b-button>
+				</b-td>
+				<b-td>&nbsp;</b-td>
+			</b-tr>
+		</b-table-simple>
 	</b-row>
 	<b-row>
 		<b-col>
 			<h3>Current Changes</h3>
 			<b-form-checkbox-group id="selected-files" v-model="commitDetail.selectedFiles" name="selectedFiles">
-				<b-table head-variant="light" striped hover :items="diff" :fields="fields" :busy="loadingDetail">
+				<b-table head-variant="light" striped hover :items="diff" :fields="fields" :busy="loadingDetail" show-empty empty-text="There are no local changes">
 					<template v-slot:cell(✅)="row">
 						<b-form-checkbox size="lg" :value="row.item.path">
 						</b-form-checkbox>
@@ -49,7 +66,10 @@
           </template>
 				</b-table>
 			</b-form-checkbox-group>
-
+		</b-col>
+	</b-row>
+	<b-row v-if="diff.length">
+		<b-col>
 			<h5>Commit message (required):</h5>
 
 			<b-form-textarea
@@ -59,11 +79,11 @@
 				rows="3"
 				max-rows="6"
 				></b-form-textarea>
+			<b-button @click="commit">Commit</b-button>
 		</b-col>
 	</b-row>
 	<b-row>
 		<b-col>
-			<b-button @click="commit">Commit</b-button>
 		</b-col>
 	</b-row>
 </b-container>
@@ -96,6 +116,10 @@
 			};
 		},
 		methods: {
+			refresh() {
+				ipcRenderer.send('git-detail', this.currentBranch)
+				this.loadingDetail = true
+			},
 			gitPull () {
 				ipcRenderer.send('git-pull', { branchName: this.currentBranch })
 				this.isPulling = true
