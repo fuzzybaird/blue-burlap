@@ -5,7 +5,7 @@
     </b-row>
     <b-row>
       <b-col>
-        <b-table head-variant="light" striped hover :items="branches" :fields="fields">
+        <b-table head-variant="light" striped hover :items="branches" :fields="fields" :busy="loadingBranches">
           <template v-slot:cell(edit)="row">
             <nuxt-link
               :to="'/branch/'+encodeURIComponent(row.item.name)"
@@ -21,6 +21,12 @@
             :key="field.key"
             :style="{ width: field.key === 'edit' ? '50px' : '' }"
             >
+          </template>
+          <template v-slot:table-busy>
+            <div class="text-center my-2">
+              <b-spinner class="align-middle"></b-spinner>
+              <strong>Loading...</strong>
+            </div>
           </template>
         </b-table>
       </b-col>
@@ -48,7 +54,8 @@ export default {
     return {
       fields: [{key:'name', sortable:true}, {key:'commit'}, {key:'edit'}],
       branches: [],
-      newBranch: ''
+      newBranch: '',
+      loadingBranches: true
     }
   },
   methods: {
@@ -63,6 +70,7 @@ export default {
     ipcRenderer.send('git-branches')
     ipcRenderer.on('git-branches', (event, payload) => {
       this.branches = Object.values(payload.branches)
+      this.loadingBranches = false
     })
     ipcRenderer.on('create-branch', (event, payload) => {
       ipcRenderer.send('git-branches')

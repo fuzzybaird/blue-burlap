@@ -26,7 +26,7 @@
 		<b-col>
 			<h3>Current Changes</h3>
 			<b-form-checkbox-group id="selected-files" v-model="commitDetail.selectedFiles" name="selectedFiles">
-				<b-table head-variant="light" striped hover :items="diff" :fields="fields">
+				<b-table head-variant="light" striped hover :items="diff" :fields="fields" :busy="loadingDetail">
 					<template v-slot:cell(✅)="row">
 						<b-form-checkbox size="lg" :value="row.item.path">
 						</b-form-checkbox>
@@ -40,6 +40,13 @@
 							<p v-else>(no diff available)</p>
 						</div>
 					</template>
+
+					<template v-slot:table-busy>
+            <div class="text-center my-2">
+              <b-spinner class="align-middle"></b-spinner>
+              <strong>Loading...</strong>
+            </div>
+          </template>
 				</b-table>
 			</b-form-checkbox-group>
 
@@ -84,7 +91,8 @@
 					selectedFiles: []
 				},
 				isPulling: false,
-				isPushing: false				
+				isPushing: false,
+				loadingDetail: true				
 			};
 		},
 		methods: {
@@ -111,18 +119,22 @@
 					this.$router.push({ path: '/' })   
 					return
 				}
+				this.loadingDetail = false
 				this.diff = payload.diff
 				this.status = payload.status
 			})
 			ipcRenderer.on('sync', (event, payload) => {
 				ipcRenderer.send('git-detail', this.currentBranch)
+				this.loadingDetail = true
 			})
 				ipcRenderer.on('git-pull', (event, payload) => {
 					this.isPulling = false
+					this.loadingDetail = true
 					ipcRenderer.send('git-detail', this.currentBranch)
 				})
 			ipcRenderer.on('git-push', (event, payload) => {
 				this.isPushing = false
+				this.loadingDetail = true
 				ipcRenderer.send('git-detail', this.currentBranch)
 			})
 		},
