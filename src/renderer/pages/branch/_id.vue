@@ -19,8 +19,8 @@
 		<b-col cols="4">{{ status.tracking }}<div v-if="!status.tracking">(not tracked remotely yet)</div></b-col>
 	</b-row>
 	<b-row>
-		<b-col cols="2"><b-button v-if="status.behind">Pull</b-button></b-col>
-		<b-col cols="2"><b-button v-if="!status.behind && (status.ahead || !status.tracking)">Push</b-button></b-col>
+		<b-col cols="2"><b-button v-if="status.behind" @click="gitPull">Pull</b-button></b-col>
+		<b-col cols="2"><b-button v-if="!status.behind && (status.ahead || !status.tracking)" @click="gitPush">Push <b-spinner v-if="isPushing" small></b-spinner></b-button></b-col>
 	</b-row>
 	<b-row>
 		<b-col>
@@ -36,7 +36,8 @@
 						<a href="javascript://" @click="row.item.show = !row.item.show">{{ row.item.path }}</a>
 						<div v-if="row.item.show">
 							<prism v-if="row.item.fileDiff" class="diff-highlight" language="diff">{{row.item.fileDiff}}</prism>
-							<p v-else><strong>New File:</strong> {{row.item.path}}</p>
+							<p v-else-if="row.item.working_dir=='?'"><strong>New File:</strong> {{row.item.path}}</p>
+							<p v-else>(no diff available)</p>
 						</div>
 					</template>
 				</b-table>
@@ -81,10 +82,20 @@
 				commitDetail: {
 					message: '',
 					selectedFiles: []
-				}
+				},
+				isPulling: false,
+				isPushing: false				
 			};
 		},
 		methods: {
+			gitPull () {
+				ipcRenderer.send('message', { type: 'success', message: 'Pull completed.' })
+				//this.isPulling = true
+			},
+			gitPush () {
+				ipcRenderer.send('git-push', { branchName: this.currentBranch })
+				this.isPushing = true
+			},
 			commit () {
 				ipcRenderer.send('commit', this.commitDetail)
 				ipcRenderer.on('commit', (event, payload) => {
@@ -104,6 +115,14 @@
 				this.status = payload.status
 			})
 			ipcRenderer.on('sync', (event, payload) => {
+				ipcRenderer.send('git-detail', this.currentBranch)
+			})
+				ipcRenderer.on('git-pull', (event, payload) => {
+					this.isPulling = false
+					ipcRenderer.send('git-detail', this.currentBranch)
+				})
+			ipcRenderer.on('git-push', (event, payload) => {
+				this.isPushing = false
 				ipcRenderer.send('git-detail', this.currentBranch)
 			})
 		},

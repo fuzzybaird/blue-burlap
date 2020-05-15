@@ -271,6 +271,24 @@ ipcMain.on('create-branch', async (event, arg) => {
   event.reply('create-branch', { done: true })
 })
 
+ipcMain.on('git-pull', async (event, arg) => {
+  
+})
+
+ipcMain.on('git-push', async (event, arg) => {
+  let result = {}
+
+  try {
+    const pushResult = await simpleGit.push('origin', arg.branchName, { '--set-upstream': null })
+    event.reply('message', { type: 'success', message: 'Successfully pushed to origin/' + arg.branchName })
+  } catch (error) {
+    result.error = true
+    event.reply('message', { type: 'error', message: 'Unable to push: ' + error })
+  }
+
+  event.reply('git-push', result)
+})
+
 ipcMain.on('commit', async (event, arg) => {
   //console.log('commit!')
   const files = arg.selectedFiles
