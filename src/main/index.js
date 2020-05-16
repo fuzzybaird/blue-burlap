@@ -156,6 +156,18 @@ ipcMain.on('discard-local', async(event, arg) => {
   event.reply('discard-local', { done: true })
 })
 
+ipcMain.on('discard-all-changes', async (event, arg) => {
+  try {
+    const response = await simpleGit.clean('f', { '-d': null })
+    console.log('discard all changes: ', response)
+    event.reply('message', { type: 'success', message: 'Successfully removed ALL changes including untracked files.', timer: longTimer })
+  } catch (error) {
+    event.reply('message', { type: 'error', message: 'Unable to discard all changes. System response: ' + error })
+  }
+
+  event.reply('discard-all-changes', { done: true })
+})
+
 ipcMain.on('open-org', async (event, arg) => {
   // Request a sync from Salesforce org; currently only "CustomObject" is pulled back...
   exec(`${settings.sfdxCommand} force:org:open -u ${settings.org}`, (error, stdout, stderr) => {

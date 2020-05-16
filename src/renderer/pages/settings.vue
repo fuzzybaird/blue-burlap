@@ -102,7 +102,8 @@ export default {
       },
       pruningRemote: false,
       pruningLocal: false,
-      discardingLocal: false
+      discardingLocal: false,
+      discardingAllChanges: false
     }
   },
   methods: {
@@ -120,6 +121,10 @@ export default {
     discardLocal() {
       ipcRenderer.send('discard-local')
       this.discardingLocal = true
+    },
+    discardAllChanges() {
+      ipcRenderer.send('discard-all-changes')
+      this.discardingAllChanges = true
     }
   },
   mounted(){
@@ -140,6 +145,9 @@ export default {
     })
     ipcRenderer.on('discard-local', (event, payload) => {
       this.discardingLocal = false
+    })
+    ipcRenderer.on('discard-all-changes', (event, payload) => {
+      this.discardingAllChanges = false
     })
 
     ipcRenderer.send('read-settings')
