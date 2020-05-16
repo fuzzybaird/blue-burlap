@@ -62,6 +62,10 @@
             <b-tooltip target="discard-local" placement="bottom" triggers="hover">
               Discards all local changes that haven't been committed
             </b-tooltip>
+            <b-button id="discard-all-changes" @click="discardAllChanges">Discard ALL Changes <b-spinner v-if="discardingAllChanges" small></b-spinner></b-button>
+            <b-tooltip target="discard-all-changes" placement="bottom" triggers="hover">
+              Discards ALL local changes including removing untracked files
+            </b-tooltip>
           </b-col>
         </b-row>
       </b-col>

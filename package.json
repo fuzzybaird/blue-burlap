@@ -1,6 +1,6 @@
 {
   "name": "Blue-Burlap",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Simplify Salesforce Admin Development with Git",
   "main": "./dist/main/index.js",
   "scripts": {
