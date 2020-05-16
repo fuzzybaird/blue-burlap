@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: 12
 
-      -run: yarn --version
+      - run: yarn --version
 
       - name: Build/release Electron app
         uses: michalzaq12/action-electron-nuxt@v1
