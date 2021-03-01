@@ -58,7 +58,7 @@
     "bootstrap-vue": "^2.7.0",
     "moment": "^2.24.0",
     "nedb": "^1.8.0",
-    "prismjs": "^1.19.0",
+    "prismjs": "^1.23.0",
     "simple-git": "^1.132.0",
     "vue": "^2.6.11",
     "vue-prism-component": "^1.1.1"
