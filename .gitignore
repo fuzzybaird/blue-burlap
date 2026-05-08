@@ -1,7 +1,6 @@
-.nuxt
-dist
-build/*
-!build/icons
 node_modules
-**/*.log
-datafile
+dist
+out
+.DS_Store
+.eslintcache
+*.log*

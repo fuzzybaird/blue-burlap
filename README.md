@@ -1,32 +1,49 @@
-# blue-burlap
+# Blue Burlap
 
-> An electron-nuxt project
+> Simplify Salesforce Admin Development with Git.
 
-#### Build Setup
+A desktop app that wraps the `sf` CLI and `git` so Salesforce admins can review, branch, commit, push, and pull metadata changes through a UI instead of the command line.
 
-``` bash
-# install dependencies
-yarn install
+## Status
 
-# serve app with hot reload
-yarn run dev
+`v2` is a ground-up rebuild on a modern stack. The 6-year-old `master` branch (Vue 2 + Nuxt 2 + Electron 8) is kept intact for reference until the rebuild reaches feature parity.
 
-# build electron application for production
-yarn run build
+## Stack
 
-# yarn tests
-yarn test
+- **Electron** + **electron-vite**
+- **React 19** + **TypeScript**
+- **Tailwind CSS v4** + **shadcn/ui**
+- **Vitest** + **Playwright** (Phase 4)
+- **electron-builder** (signed Mac/Win/Linux releases, Phase 5)
 
+## Requirements
 
-# lint all JS/Vue component files in `src/`
-yarn run lint
+- Node.js 22+
+- Salesforce CLI (`sf`) on your `PATH`
+- Git 2.40+
 
+## Develop
+
+```bash
+npm install
+npm run dev
 ```
 
----
+## Build
 
-This project was generated with [electron-nuxt](https://github.com/michalzaq12/electron-nuxt) v1.5.0 using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://github.com/michalzaq12/electron-nuxt/blob/master/README.md).
+```bash
+npm run build           # typecheck + build
+npm run build:mac       # macOS bundle
+npm run build:win       # Windows installer
+npm run build:linux     # Linux AppImage / deb / snap
+```
 
-## Notes
+## Modernization phases
 
-* Icon build instructions from: https://stackoverflow.com/questions/31529772/how-to-set-app-icon-for-electron-atom-shell-app
+- [x] **Phase 0** — scaffold (electron-vite + React + TS + Tailwind + shadcn/ui)
+- [ ] **Phase 1** — main process port (settings, git, `sf` CLI wrappers)
+- [ ] **Phase 2** — typed IPC layer
+- [ ] **Phase 3** — renderer pages (settings, branch list, branch detail, commit)
+- [ ] **Phase 4** — tests + CI
+- [ ] **Phase 5** — code signing + auto-update
+- [ ] **Phase 6** — cutover (`v2` → `master`)
