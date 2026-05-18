@@ -1,6 +1,6 @@
 import simpleGit, { type SimpleGit, type StatusResult, type LogResult, type BranchSummary } from 'simple-git'
 import { getSettings } from './settings'
-import type { FileDiff, CommitResult, PruneLocalResult } from '../shared/types'
+import type { FileDiff, CommitResult, PruneLocalResult } from '../shared/contract'
 
 function git(): SimpleGit {
   const cwd = getSettings().projectPath

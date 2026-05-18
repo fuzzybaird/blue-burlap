@@ -1,7 +1,7 @@
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { getSettings } from './settings'
-import type { OrgEntry, RetrieveResult, SfStatus } from '../shared/types'
+import type { OrgEntry, RetrieveResult, SfStatus } from '../shared/contract'
 
 const execFileP = promisify(execFile)
 
