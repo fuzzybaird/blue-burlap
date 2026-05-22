@@ -7,7 +7,12 @@ const defaults: Settings = {
   projectPath: '',
   sfPath: 'sf',
   defaultOrg: '',
-  metadata: []
+  metadata: [],
+  retrievalFormat: 'source',
+  retrieveMode: 'all',
+  specificItems: {},
+  sinceDate: '',
+  jiraBaseUrl: ''
 }
 
 const store = new Store<Settings>({

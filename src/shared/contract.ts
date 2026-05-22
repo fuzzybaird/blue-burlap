@@ -4,7 +4,21 @@ export const settingsSchema = z.object({
   projectPath: z.string(),
   sfPath: z.string(),
   defaultOrg: z.string(),
-  metadata: z.array(z.string())
+  metadata: z.array(z.string()),
+  // No .default() here on purpose — Zod's `.partial()` doesn't drop defaults,
+  // so a partial save like `{ defaultOrg }` would inject `retrievalFormat:
+  // 'source'` and silently stomp the user's choice. electron-store handles
+  // the new-user default at the data layer instead (see main/settings.ts).
+  retrievalFormat: z.enum(['source', 'metadata']),
+  retrieveMode: z.enum(['all', 'specific', 'since-date']),
+  // Per-type specific item names: { ApexClass: ['MyClass1', 'MyClass2'], ... }
+  specificItems: z.record(z.string(), z.array(z.string())),
+  // ISO date (YYYY-MM-DD) used by 'since-date' mode. Empty string when unset.
+  sinceDate: z.string(),
+  // Base URL up to and including the ticket-browse path, e.g.
+  // "https://yourcompany.atlassian.net/browse/". Empty disables the Jira
+  // button.
+  jiraBaseUrl: z.string()
 })
 
 export const sfStatusSchema = z.object({
@@ -29,20 +43,37 @@ export const fileDiffSchema = z.object({
   index: z.string(),
   working_dir: z.string(),
   fileDiff: z.string().nullable(),
-  show: z.boolean()
+  show: z.boolean(),
+  whitespaceOnly: z.boolean()
 })
 
+export const retrieveFileSchema = z
+  .object({
+    fullName: z.string(),
+    type: z.string(),
+    state: z.string(),
+    filePath: z.string().optional(),
+    error: z.string().optional(),
+    problemType: z.string().optional()
+  })
+  .passthrough()
+
 export const retrieveResultSchema = z.object({
-  inboundFiles: z.array(
-    z.object({
-      filePath: z.string(),
-      fullName: z.string(),
-      type: z.string(),
-      state: z.string()
-    })
-  ),
-  warnings: z.array(z.string()).optional()
+  inboundFiles: z.array(retrieveFileSchema),
+  warnings: z.array(z.unknown()).optional()
 })
+
+export const metadataItemSchema = z
+  .object({
+    fullName: z.string(),
+    type: z.string().optional(),
+    lastModifiedDate: z.string().optional(),
+    lastModifiedByName: z.string().optional(),
+    fileName: z.string().optional(),
+    namespacePrefix: z.string().optional(),
+    manageableState: z.string().optional()
+  })
+  .passthrough()
 
 export const commitResultSchema = z.object({
   commit: z.string(),
@@ -55,12 +86,18 @@ export const pruneLocalResultSchema = z.object({
 })
 
 const branchSummarySchema = z.unknown()
-const statusResultSchema = z.unknown()
 const logResultSchema = z.unknown()
+
+export const statusSummarySchema = z.object({
+  current: z.string().nullable(),
+  ahead: z.number(),
+  behind: z.number(),
+  tracking: z.string().nullable()
+})
 
 export const branchDetailSchema = z.object({
   diff: z.array(fileDiffSchema),
-  status: statusResultSchema
+  status: statusSummarySchema
 })
 
 export const commitInputSchema = z.object({
@@ -78,12 +115,29 @@ export const contract = {
     check: { input: z.void(), output: sfStatusSchema },
     listOrgs: { input: z.void(), output: z.array(orgEntrySchema) },
     openOrg: { input: z.string(), output: z.void() },
-    retrieve: { input: z.void(), output: retrieveResultSchema }
+    retrieve: {
+      input: z.object({
+        // When provided, completely overrides the metadata + specificItems
+        // derived from settings. Used by 'since-date' mode where the renderer
+        // has the date-filtered list ready to go.
+        override: z
+          .object({
+            metadata: z.array(z.string()),
+            specificItems: z.record(z.string(), z.array(z.string()))
+          })
+          .optional()
+      }),
+      output: retrieveResultSchema
+    },
+    listMetadataItems: { input: z.string(), output: z.array(metadataItemSchema) }
   },
   git: {
     log: { input: z.void(), output: logResultSchema },
     branches: { input: z.void(), output: branchSummarySchema },
+    current: { input: z.void(), output: z.string().nullable() },
+    remoteUrl: { input: z.void(), output: z.string().nullable() },
     detail: { input: z.string(), output: branchDetailSchema },
+    checkout: { input: z.string(), output: z.void() },
     createBranch: { input: z.string(), output: z.void() },
     pull: { input: z.string(), output: z.void() },
     push: { input: z.string(), output: z.void() },
@@ -91,7 +145,8 @@ export const contract = {
     pruneRemote: { input: z.void(), output: z.void() },
     pruneLocal: { input: z.void(), output: pruneLocalResultSchema },
     discardLocal: { input: z.void(), output: z.void() },
-    discardAll: { input: z.void(), output: z.void() }
+    discardAll: { input: z.void(), output: z.void() },
+    discardFiles: { input: z.array(z.string()), output: z.void() }
   }
 } as const
 
@@ -105,6 +160,8 @@ export type RetrieveResult = z.infer<typeof retrieveResultSchema>
 export type CommitResult = z.infer<typeof commitResultSchema>
 export type PruneLocalResult = z.infer<typeof pruneLocalResultSchema>
 export type BranchDetail = z.infer<typeof branchDetailSchema>
+export type StatusSummary = z.infer<typeof statusSummarySchema>
+export type MetadataItem = z.infer<typeof metadataItemSchema>
 type Endpoint = { input: z.ZodType; output: z.ZodType }
 type Namespace = Record<string, Endpoint>
 

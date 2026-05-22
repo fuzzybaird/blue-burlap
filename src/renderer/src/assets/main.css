@@ -92,4 +92,9 @@
       sans-serif;
     user-select: none;
   }
+  /* Default <button> elements don't get cursor:pointer in browsers and
+     shadcn intentionally doesn't add it. We want pointer on every button. */
+  button:not(:disabled) {
+    cursor: pointer;
+  }
 }

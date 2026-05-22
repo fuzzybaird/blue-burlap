@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   Loader2,
@@ -7,7 +7,8 @@ import {
   ArrowUpFromLine,
   GitCommit,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Trash2
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -23,14 +24,14 @@ import {
   TableRow
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
-import { useBranchDetail, usePull, usePush, useCommit } from '@/api/hooks'
-
-interface StatusLike {
-  current: string | null
-  ahead: number
-  behind: number
-  tracking: string | null
-}
+import {
+  useBranchDetail,
+  usePull,
+  usePush,
+  useCommit,
+  useDiscardFiles
+} from '@/api/hooks'
+import type { FileDiff } from '@shared/contract'
 
 export function BranchDetailPage(): React.JSX.Element {
   const params = useParams<{ name: string }>()
@@ -41,9 +42,11 @@ export function BranchDetailPage(): React.JSX.Element {
   const pull = usePull()
   const push = usePush()
   const commit = useCommit()
+  const discardFiles = useDiscardFiles()
 
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [whitespaceOpen, setWhitespaceOpen] = useState(false)
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -53,8 +56,18 @@ export function BranchDetailPage(): React.JSX.Element {
     }
   }, [detail.error, navigate])
 
-  const status = detail.data?.status as StatusLike | undefined
-  const diff = detail.data?.diff ?? []
+  const status = detail.data?.status
+  const diff = useMemo(() => detail.data?.diff ?? [], [detail.data])
+
+  const { realChanges, whitespaceOnly } = useMemo(() => {
+    const real: FileDiff[] = []
+    const ws: FileDiff[] = []
+    for (const file of diff) {
+      ;(file.whitespaceOnly ? ws : real).push(file)
+    }
+    return { realChanges: real, whitespaceOnly: ws }
+  }, [diff])
+
   const hasChanges = diff.length > 0
   const isLoading = detail.isPending
 
@@ -92,6 +105,15 @@ export function BranchDetailPage(): React.JSX.Element {
         onError: (err) => toast.error(`Commit failed: ${err.message}`)
       }
     )
+  }
+
+  const handleDiscardWhitespace = (): void => {
+    const paths = whitespaceOnly.map((f) => f.path)
+    if (paths.length === 0) return
+    discardFiles.mutate(paths, {
+      onSuccess: () => toast.success(`Discarded ${paths.length} whitespace-only file(s)`),
+      onError: (err) => toast.error(`Discard failed: ${err.message}`)
+    })
   }
 
   const showPull = (status?.behind ?? 0) > 0
@@ -186,7 +208,7 @@ export function BranchDetailPage(): React.JSX.Element {
 
       <Card>
         <CardHeader>
-          <CardTitle>Current Changes</CardTitle>
+          <CardTitle>Changes {hasChanges && <span className="text-muted-foreground">({realChanges.length})</span>}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
@@ -194,59 +216,81 @@ export function BranchDetailPage(): React.JSX.Element {
               <Loader2 className="size-4 animate-spin" />
               Loading…
             </div>
-          ) : !hasChanges ? (
+          ) : realChanges.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">
-              There are no local changes.
+              {whitespaceOnly.length > 0
+                ? 'No content changes — only whitespace-only changes below.'
+                : 'There are no local changes.'}
             </p>
           ) : (
             <div className="divide-y">
-              {diff.map((file) => {
-                const isExpanded = expanded.has(file.path)
-                const isUntracked = file.working_dir === '?'
-                return (
-                  <div key={file.path}>
-                    <div className="flex items-center gap-3 px-4 py-2">
-                      <Checkbox
-                        checked={selected.has(file.path)}
-                        onCheckedChange={() => toggleSelected(file.path)}
-                      />
-                      <button
-                        className="inline-flex flex-1 items-center gap-2 text-left font-mono text-xs hover:text-primary"
-                        onClick={() => toggleExpanded(file.path)}
-                      >
-                        {isExpanded ? (
-                          <ChevronDown className="size-3.5" />
-                        ) : (
-                          <ChevronRight className="size-3.5" />
-                        )}
-                        {file.path}
-                        {isUntracked && <span className="text-emerald-600">(new)</span>}
-                      </button>
-                    </div>
-                    {isExpanded && (
-                      <div className="bg-muted/40 px-4 pb-4">
-                        {file.fileDiff ? (
-                          <DiffView text={file.fileDiff} />
-                        ) : isUntracked ? (
-                          <p className="font-mono text-xs text-muted-foreground">
-                            New file — no diff to show.
-                          </p>
-                        ) : (
-                          <p className="font-mono text-xs text-muted-foreground">
-                            (no diff available)
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
+              {realChanges.map((file) => (
+                <FileRow
+                  key={file.path}
+                  file={file}
+                  selected={selected.has(file.path)}
+                  expanded={expanded.has(file.path)}
+                  onToggleSelect={() => toggleSelected(file.path)}
+                  onToggleExpand={() => toggleExpanded(file.path)}
+                />
+              ))}
             </div>
           )}
         </CardContent>
       </Card>
 
-      {hasChanges && (
+      {whitespaceOnly.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between gap-4">
+              <button
+                onClick={() => setWhitespaceOpen((v) => !v)}
+                className="inline-flex items-center gap-2 text-left"
+              >
+                {whitespaceOpen ? (
+                  <ChevronDown className="size-4" />
+                ) : (
+                  <ChevronRight className="size-4" />
+                )}
+                <CardTitle>
+                  Whitespace-only changes{' '}
+                  <span className="text-muted-foreground">({whitespaceOnly.length})</span>
+                </CardTitle>
+              </button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleDiscardWhitespace}
+                disabled={discardFiles.isPending}
+              >
+                {discardFiles.isPending ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Trash2 className="size-3.5" />
+                )}
+                Discard All
+              </Button>
+            </div>
+          </CardHeader>
+          {whitespaceOpen && (
+            <CardContent className="p-0">
+              <ul className="divide-y">
+                {whitespaceOnly.map((file) => (
+                  <li
+                    key={file.path}
+                    className="px-4 py-2 font-mono text-xs text-muted-foreground"
+                    title={file.path}
+                  >
+                    {file.path}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          )}
+        </Card>
+      )}
+
+      {realChanges.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Commit</CardTitle>
@@ -260,7 +304,7 @@ export function BranchDetailPage(): React.JSX.Element {
             />
             <div className="flex items-center justify-between">
               <p className="text-xs text-muted-foreground">
-                {selected.size} of {diff.length} file(s) selected
+                {selected.size} of {realChanges.length} file(s) selected
               </p>
               <Button onClick={handleCommit} disabled={commit.isPending}>
                 {commit.isPending ? (
@@ -273,6 +317,57 @@ export function BranchDetailPage(): React.JSX.Element {
             </div>
           </CardContent>
         </Card>
+      )}
+    </div>
+  )
+}
+
+function FileRow({
+  file,
+  selected,
+  expanded,
+  onToggleSelect,
+  onToggleExpand
+}: {
+  file: FileDiff
+  selected: boolean
+  expanded: boolean
+  onToggleSelect: () => void
+  onToggleExpand: () => void
+}): React.JSX.Element {
+  const isUntracked = file.working_dir === '?'
+  return (
+    <div>
+      <div className="flex items-center gap-3 px-4 py-2">
+        <Checkbox checked={selected} onCheckedChange={onToggleSelect} />
+        <button
+          className="inline-flex min-w-0 flex-1 items-center gap-2 text-left font-mono text-xs hover:text-primary"
+          onClick={onToggleExpand}
+          title={file.path}
+        >
+          {expanded ? (
+            <ChevronDown className="size-3.5 shrink-0" />
+          ) : (
+            <ChevronRight className="size-3.5 shrink-0" />
+          )}
+          <span className="truncate">{file.path}</span>
+          {isUntracked && <span className="shrink-0 text-emerald-600">(new)</span>}
+        </button>
+      </div>
+      {expanded && (
+        <div className="bg-muted/40 px-4 pb-4">
+          {file.fileDiff ? (
+            <DiffView text={file.fileDiff} />
+          ) : isUntracked ? (
+            <p className="font-mono text-xs text-muted-foreground">
+              New file — no diff to show.
+            </p>
+          ) : (
+            <p className="font-mono text-xs text-muted-foreground">
+              (no diff available)
+            </p>
+          )}
+        </div>
       )}
     </div>
   )

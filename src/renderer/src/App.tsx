@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { AppShell } from '@/components/layout/AppShell'
 import { BranchListPage } from '@/pages/BranchList'
 import { BranchDetailPage } from '@/pages/BranchDetail'
+import { RetrievePage } from '@/pages/Retrieve'
 import { SettingsPage } from '@/pages/Settings'
 
 const router = createHashRouter([
@@ -11,6 +12,7 @@ const router = createHashRouter([
     element: <AppShell />,
     children: [
       { path: '/', element: <BranchListPage /> },
+      { path: '/retrieve', element: <RetrievePage /> },
       { path: '/branch/:name', element: <BranchDetailPage /> },
       { path: '/settings', element: <SettingsPage /> }
     ]

@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Loader2, Save } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   Select,
   SelectContent,
@@ -14,6 +13,17 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from '@/components/ui/alert-dialog'
 import {
   useSettings,
   useSaveSettings,
@@ -24,18 +34,6 @@ import {
   useDiscardAll
 } from '@/api/hooks'
 import type { Settings } from '@shared/contract'
-
-const METADATA_OPTIONS: { value: string; label: string }[] = [
-  { value: 'ApexClass', label: 'Apex Classes' },
-  { value: 'CustomField', label: 'Custom Fields' },
-  { value: 'CustomLabel', label: 'Custom Labels' },
-  { value: 'CustomObject', label: 'Custom Objects' },
-  { value: 'GlobalValueSet', label: 'Global Value Sets' },
-  { value: 'Layout', label: 'Layouts' },
-  { value: 'ListView', label: 'List Views' },
-  { value: 'ApexComponent', label: 'Visualforce Components' },
-  { value: 'ApexPage', label: 'Visualforce Pages' }
-]
 
 export function SettingsPage(): React.JSX.Element {
   const settingsQuery = useSettings()
@@ -56,31 +54,28 @@ export function SettingsPage(): React.JSX.Element {
     )
   }
 
-  const update = (patch: Partial<Settings>): void => setDraft({ ...draft, ...patch })
+  const updateDraft = (patch: Partial<Settings>): void =>
+    setDraft((prev) => (prev ? { ...prev, ...patch } : prev))
 
-  const handleSave = (): void => {
-    save.mutate(draft, {
-      onSuccess: () => toast.success('Settings saved'),
+  const saveNow = (patch: Partial<Settings>): void => {
+    save.mutate(patch, {
       onError: (err) => toast.error(`Save failed: ${err.message}`)
     })
   }
 
-  const toggleMetadata = (value: string, checked: boolean): void => {
-    const next = checked
-      ? [...draft.metadata, value]
-      : draft.metadata.filter((m) => m !== value)
-    update({ metadata: next })
+  const updateAndSave = (patch: Partial<Settings>): void => {
+    updateDraft(patch)
+    saveNow(patch)
+  }
+
+  const handleTextBlur = (field: keyof Settings, value: string): void => {
+    if (settingsQuery.data?.[field] === value) return
+    saveNow({ [field]: value } as Partial<Settings>)
   }
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <Button onClick={handleSave} disabled={save.isPending}>
-          {save.isPending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-          Save
-        </Button>
-      </div>
+      <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
@@ -97,7 +92,7 @@ export function SettingsPage(): React.JSX.Element {
               ) : (
                 <Select
                   value={draft.defaultOrg}
-                  onValueChange={(value) => update({ defaultOrg: value })}
+                  onValueChange={(value) => updateAndSave({ defaultOrg: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select an org" />
@@ -120,21 +115,26 @@ export function SettingsPage(): React.JSX.Element {
             </div>
 
             <div className="space-y-2">
-              <Label>Metadata to retrieve</Label>
-              <div className="grid grid-cols-2 gap-2 rounded-md border p-3">
-                {METADATA_OPTIONS.map((opt) => {
-                  const checked = draft.metadata.includes(opt.value)
-                  return (
-                    <label key={opt.value} className="flex items-center gap-2 text-sm">
-                      <Checkbox
-                        checked={checked}
-                        onCheckedChange={(c) => toggleMetadata(opt.value, c === true)}
-                      />
-                      <span>{opt.label}</span>
-                    </label>
-                  )
-                })}
-              </div>
+              <Label>Retrieve format</Label>
+              <Select
+                value={draft.retrievalFormat}
+                onValueChange={(value) =>
+                  updateAndSave({ retrievalFormat: value as 'source' | 'metadata' })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="source">Source format (default)</SelectItem>
+                  <SelectItem value="metadata">Metadata format</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {draft.retrievalFormat === 'metadata'
+                  ? 'Retrieved files are unzipped from sf and merged into your project’s src/ directory.'
+                  : 'Retrieved as standard DX source format into your project tree.'}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -149,7 +149,8 @@ export function SettingsPage(): React.JSX.Element {
               <Input
                 id="projectPath"
                 value={draft.projectPath}
-                onChange={(e) => update({ projectPath: e.target.value })}
+                onChange={(e) => updateDraft({ projectPath: e.target.value })}
+                onBlur={(e) => handleTextBlur('projectPath', e.target.value)}
                 placeholder="/path/to/sfdx-project"
                 spellCheck={false}
               />
@@ -160,12 +161,30 @@ export function SettingsPage(): React.JSX.Element {
               <Input
                 id="sfPath"
                 value={draft.sfPath}
-                onChange={(e) => update({ sfPath: e.target.value })}
+                onChange={(e) => updateDraft({ sfPath: e.target.value })}
+                onBlur={(e) => handleTextBlur('sfPath', e.target.value)}
                 placeholder="sf"
                 spellCheck={false}
               />
               <p className="text-xs text-muted-foreground">
                 Use <code className="rounded bg-muted px-1">sf</code> if it&apos;s on your PATH, or full path to the binary.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="jiraBaseUrl">Jira Issue URL</Label>
+              <Input
+                id="jiraBaseUrl"
+                value={draft.jiraBaseUrl}
+                onChange={(e) => updateDraft({ jiraBaseUrl: e.target.value })}
+                onBlur={(e) => handleTextBlur('jiraBaseUrl', e.target.value)}
+                placeholder="https://your-org.atlassian.net/browse/"
+                spellCheck={false}
+              />
+              <p className="text-xs text-muted-foreground">
+                When set, a Jira link appears in the header for branches matching{' '}
+                <code className="rounded bg-muted px-1">type/KEY-123-…</code> (e.g. {' '}
+                <span className="font-mono">feature/SE-1234-some-feature</span>).
               </p>
             </div>
 
@@ -205,6 +224,12 @@ function MaintenanceButtons(): React.JSX.Element {
         tooltip="Removes references to remote branches that no longer exist"
         pending={pruneRemote.isPending}
         onClick={() => run(pruneRemote, 'Pruned remote branches', 'Prune remote failed')}
+        confirm={{
+          title: 'Prune remote-tracking branches?',
+          description:
+            'Removes your local references to branches that no longer exist on origin. This affects only your local view of remotes — actual remote branches are untouched. Safe to run regularly.',
+          confirmLabel: 'Prune'
+        }}
       >
         Prune Remote
       </MaintenanceButton>
@@ -217,6 +242,12 @@ function MaintenanceButtons(): React.JSX.Element {
             onError: (err) => toast.error(`Prune local failed: ${err.message}`)
           })
         }
+        confirm={{
+          title: 'Prune merged local branches?',
+          description:
+            'Deletes every local branch that is fully merged into master. These branches have no unmerged commits, but if you have local-only references you want to keep, cancel and prune manually.',
+          confirmLabel: 'Prune'
+        }}
       >
         Prune Local
       </MaintenanceButton>
@@ -225,6 +256,13 @@ function MaintenanceButtons(): React.JSX.Element {
         pending={discardLocal.isPending}
         variant="outline"
         onClick={() => run(discardLocal, 'Discarded local changes', 'Discard failed')}
+        confirm={{
+          title: 'Discard local changes?',
+          description:
+            'Reverts uncommitted changes in tracked files back to HEAD. Untracked files are kept. Any tracked work you haven’t committed will be lost.',
+          confirmLabel: 'Discard',
+          confirmVariant: 'destructive'
+        }}
       >
         Discard Local
       </MaintenanceButton>
@@ -233,6 +271,13 @@ function MaintenanceButtons(): React.JSX.Element {
         pending={discardAll.isPending}
         variant="destructive"
         onClick={() => run(discardAll, 'Discarded ALL changes', 'Discard failed')}
+        confirm={{
+          title: 'Discard ALL changes including untracked files?',
+          description:
+            'Reverts uncommitted tracked changes AND removes all untracked files. This is the most destructive option — anything not committed will be gone permanently.',
+          confirmLabel: 'Discard everything',
+          confirmVariant: 'destructive'
+        }}
       >
         Discard ALL
       </MaintenanceButton>
@@ -240,29 +285,75 @@ function MaintenanceButtons(): React.JSX.Element {
   )
 }
 
+interface ConfirmOptions {
+  title: string
+  description: string
+  confirmLabel?: string
+  confirmVariant?: 'default' | 'destructive'
+}
+
 function MaintenanceButton({
   tooltip,
   pending,
   variant = 'secondary',
   onClick,
+  confirm,
   children
 }: {
   tooltip: string
   pending: boolean
   variant?: 'secondary' | 'outline' | 'destructive'
   onClick: () => void
+  confirm?: ConfirmOptions
   children: React.ReactNode
 }): React.JSX.Element {
+  if (!confirm) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button size="sm" variant={variant} onClick={onClick} disabled={pending}>
+            {pending && <Loader2 className="size-3.5 animate-spin" />}
+            {children}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{tooltip}</TooltipContent>
+      </Tooltip>
+    )
+  }
+
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button size="sm" variant={variant} onClick={onClick} disabled={pending}>
-          {pending && <Loader2 className="size-3.5 animate-spin" />}
-          {children}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
-    </Tooltip>
+    <AlertDialog>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <AlertDialogTrigger asChild>
+            <Button size="sm" variant={variant} disabled={pending}>
+              {pending && <Loader2 className="size-3.5 animate-spin" />}
+              {children}
+            </Button>
+          </AlertDialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>{tooltip}</TooltipContent>
+      </Tooltip>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{confirm.title}</AlertDialogTitle>
+          <AlertDialogDescription>{confirm.description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={onClick}
+            className={
+              confirm.confirmVariant === 'destructive'
+                ? 'bg-destructive text-white hover:bg-destructive/90'
+                : undefined
+            }
+          >
+            {confirm.confirmLabel ?? 'Confirm'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 
